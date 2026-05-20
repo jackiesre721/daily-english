@@ -1,0 +1,319 @@
+# Instincts generated from https://github.com/jackiesre721/daily-english
+# Generated: 2026-05-20T06:26:23.001Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: daily-english-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/jackiesre721/daily-english
+---
+
+# Daily English Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: feat, ci
+
+## Evidence
+
+- 2 commits analyzed
+- Detected conventional commit pattern
+- Examples: feat: add Wails macOS desktop app, ci: add GitHub Actions release workflow and Homebrew Cask
+
+---
+id: daily-english-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/jackiesre721/daily-english
+---
+
+# Daily English Commit Length
+
+## Action
+
+Keep commit messages concise (~45 characters)
+
+## Evidence
+
+- Average commit message length: 45 chars
+- Based on 2 commits
+
+---
+id: daily-english-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/jackiesre721/daily-english
+---
+
+# Daily English Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: daily-english-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/jackiesre721/daily-english
+---
+
+# Daily English Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: daily-english-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/jackiesre721/daily-english
+---
+
+# Daily English Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: daily-english-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/jackiesre721/daily-english
+---
+
+# Daily English Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: daily-english-instinct-go-file-naming
+trigger: "When creating a new Go source file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: jackiesre721/daily-english
+---
+
+# Daily English Instinct Go File Naming
+
+## Action
+
+Name the file using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.files: camelCase
+
+---
+id: daily-english-instinct-go-function-naming
+trigger: "When defining a new function in Go"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: jackiesre721/daily-english
+---
+
+# Daily English Instinct Go Function Naming
+
+## Action
+
+Use camelCase for the function name
+
+## Evidence
+
+- Pattern in namingConventions.functions: camelCase
+
+---
+id: daily-english-instinct-go-class-naming
+trigger: "When defining a new struct or class in Go"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: jackiesre721/daily-english
+---
+
+# Daily English Instinct Go Class Naming
+
+## Action
+
+Use PascalCase for the struct or class name
+
+## Evidence
+
+- Pattern in namingConventions.classes: PascalCase
+
+---
+id: daily-english-instinct-go-constant-naming
+trigger: "When defining a constant in Go"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: jackiesre721/daily-english
+---
+
+# Daily English Instinct Go Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for the constant name
+
+## Evidence
+
+- Pattern in namingConventions.constants: SCREAMING_SNAKE_CASE
+
+---
+id: daily-english-instinct-go-import-style
+trigger: "When importing modules in Go"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: jackiesre721/daily-english
+---
+
+# Daily English Instinct Go Import Style
+
+## Action
+
+Use relative import paths
+
+## Evidence
+
+- Pattern in importStyle: relative
+
+---
+id: daily-english-instinct-go-export-style
+trigger: "When exporting functions or variables in Go"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: jackiesre721/daily-english
+---
+
+# Daily English Instinct Go Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle: named
+
+---
+id: daily-english-instinct-commit-conventional
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: jackiesre721/daily-english
+---
+
+# Daily English Instinct Commit Conventional
+
+## Action
+
+Use the Conventional Commits format with a prefix such as 'feat' or 'ci', followed by a colon and a concise description
+
+## Evidence
+
+- Seen in commit: feat: add Wails macOS desktop app
+- Seen in commit: ci: add GitHub Actions release workflow and Homebrew Cask
+- Pattern in commits.prefixes: ["feat", "ci"]
+
+---
+id: daily-english-instinct-commit-length
+trigger: "When composing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: jackiesre721/daily-english
+---
+
+# Daily English Instinct Commit Length
+
+## Action
+
+Keep the commit message around 45 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength: 45
+
+---
+id: daily-english-instinct-test-location
+trigger: "When adding new tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: jackiesre721/daily-english
+---
+
+# Daily English Instinct Test Location
+
+## Action
+
+Place test files in a separate directory from source files
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation: separate
+
+---
+id: daily-english-instinct-release-workflow
+trigger: "When automating releases"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: jackiesre721/daily-english
+---
+
+# Daily English Instinct Release Workflow
+
+## Action
+
+Use a GitHub Actions workflow defined in .github/workflows/release.yml
+
+## Evidence
+
+- Pattern in architecture.configFiles: .github/workflows/release.yml
+
