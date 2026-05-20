@@ -1,0 +1,21 @@
+{
+  "name": "Daily English",
+  "outputfilename": "Daily English",
+  "frontend:dir": "static",
+  "frontend:install": "echo 'no npm install needed'",
+  "frontend:build": "echo 'no frontend build needed'",
+  "frontend:dev:watcher": "echo 'no watcher needed'",
+  "wailsjsdir": "static/wailsjs",
+  "assetdir": "static",
+  "icon": "build/appicon.png",
+  "author": {
+    "name": "richie"
+  },
+  "info": {
+    "companyName": "Daily English",
+    "productName": "Daily English",
+    "productVersion": "1.0.0",
+    "copyright": "Copyright 2025",
+    "comments": "English learning companion"
+  }
+}

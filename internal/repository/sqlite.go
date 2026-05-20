@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -20,7 +21,7 @@ func (db *DB) BeginTx() (*sql.Tx, error) {
 	return db.DB.Begin()
 }
 
-func InitDB(dbPath string) *DB {
+func InitDB(dbPath string, migrationsFS fs.FS) *DB {
 	dir := filepath.Dir(dbPath)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		log.Fatalf("create db dir: %v", err)
@@ -74,7 +75,7 @@ func InitDB(dbPath string) *DB {
 		db.Exec("ALTER TABLE vocabulary ADD COLUMN updated_at TEXT NOT NULL DEFAULT '' ")
 	}
 
-	entries, err := os.ReadDir("./migrations/")
+	entries, err := fs.ReadDir(migrationsFS, ".")
 	if err != nil {
 		log.Fatalf("read migrations dir: %v", err)
 	}
@@ -83,7 +84,7 @@ func InitDB(dbPath string) *DB {
 		if !strings.HasSuffix(entry.Name(), ".sql") {
 			continue
 		}
-		sqlBytes, err := os.ReadFile(filepath.Join("./migrations", entry.Name()))
+		sqlBytes, err := fs.ReadFile(migrationsFS, entry.Name())
 		if err != nil {
 			log.Fatalf("read migration %s: %v", entry.Name(), err)
 		}

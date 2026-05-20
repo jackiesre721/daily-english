@@ -1,26 +1,82 @@
 package main
 
 import (
+	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
-	"daily-english/internal/config"
+	"io/fs"
+	"log"
+	"net"
+	"net/http"
+	"os"
+	"path/filepath"
+
 	"daily-english/internal/handler"
 	"daily-english/internal/model"
 	"daily-english/internal/repository"
 	"daily-english/internal/router"
-	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/mac"
+
+	"net/http/httputil"
+	"net/url"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-func main() {
-	cfg := config.Load()
+//go:embed migrations
+var migrations embed.FS
 
-	db := repository.InitDB(cfg.DBPath, os.DirFS("./migrations"))
+//go:embed static
+var staticFS embed.FS
+
+type App struct {
+	ctx     context.Context
+	dataDir string
+}
+
+func (a *App) startup(ctx context.Context) {
+	a.ctx = ctx
+}
+
+func (a *App) GetAppDataDir() string {
+	return a.dataDir
+}
+
+func (a *App) ChooseTextFile() (string, error) {
+	return runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "Choose a text file",
+		Filters: []runtime.FileFilter{
+			{DisplayName: "Text Files", Pattern: "*.txt"},
+			{DisplayName: "SRT Subtitles", Pattern: "*.srt"},
+			{DisplayName: "All Files", Pattern: "*.*"},
+		},
+	})
+}
+
+func getAppDataDir() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalf("get home dir: %v", err)
+	}
+	dir := filepath.Join(home, "Library", "Application Support", "DailyEnglish")
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		log.Fatalf("create app data dir: %v", err)
+	}
+	return dir
+}
+
+func main() {
+	dataDir := getAppDataDir()
+	dbPath := filepath.Join(dataDir, "dailyenglish.db")
+
+	db := repository.InitDB(dbPath, migrations)
 	defer db.Close()
 
-	// repos
 	articleRepo := repository.NewArticleRepo(db)
 	scenarioRepo := repository.NewScenarioRepo(db)
 	userRepo := repository.NewUserRepo(db)
@@ -30,20 +86,17 @@ func main() {
 	vocabRepo := repository.NewVocabularyRepo(db, articleRepo)
 	phraseRepo := repository.NewPhraseRepo(db)
 	analysisRepo := repository.NewAnalysisRepo(db)
-	dictRepo := repository.OpenECDICT(cfg.Data)
+	dictRepo := repository.OpenECDICT(dataDir)
 	if dictRepo != nil {
 		defer dictRepo.Close()
 	}
 
-	// seed only on first run (when scenario table is empty)
-	seedIfFirstRun(articleRepo, scenarioRepo, cfg.Data)
+	seedIfFirstRun(articleRepo, scenarioRepo, dataDir)
 
-	// backfill vocabulary from existing articles
 	if err := vocabRepo.BackfillFromArticles(); err != nil {
 		fmt.Printf("vocabulary backfill: %v\n", err)
 	}
 
-	// handlers
 	articleHandler := handler.NewArticleHandler(articleRepo)
 	scenarioHandler := handler.NewScenarioHandler(scenarioRepo, learningRepo)
 	dashboardHandler := handler.NewDashboardHandler(userRepo, articleRepo, learningRepo, scenarioRepo)
@@ -76,21 +129,88 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
 
-	r.Static("/css", cfg.Static+"/css")
-	r.Static("/js", cfg.Static+"/js")
-	r.StaticFile("/", cfg.Static+"/home.html")
-	for _, f := range []string{"home", "import", "settings", "article", "theme-preview"} {
-		r.StaticFile("/"+f+".html", cfg.Static+"/"+f+".html")
-	}
+	staticSub, _ := fs.Sub(staticFS, "static")
+	r.NoRoute(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		if path == "/" {
+			path = "/home.html"
+		}
+		f, err := fs.ReadFile(staticSub, path[1:])
+		if err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		c.Data(http.StatusOK, contentType(path), f)
+	})
 
-	fmt.Printf("server running at http://localhost:%s\n", cfg.Port)
-	if err := r.Run(":" + cfg.Port); err != nil {
-		fmt.Printf("server error: %v\n", err)
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		log.Fatalf("find available port: %v", err)
+	}
+	port := listener.Addr().(*net.TCPAddr).Port
+	listener.Close()
+	addr := fmt.Sprintf("127.0.0.1:%d", port)
+
+	go func() {
+		if err := r.Run(addr); err != nil {
+			log.Fatalf("gin server error: %v", err)
+		}
+	}()
+
+	fmt.Printf("gin server on %s\n", addr)
+
+	app := &App{dataDir: dataDir}
+
+	ginURL, _ := url.Parse("http://" + addr)
+	proxy := httputil.NewSingleHostReverseProxy(ginURL)
+
+	if err := wails.Run(&options.App{
+		Title:     "Daily English",
+		Width:     1200,
+		Height:    800,
+		MinWidth:  900,
+		MinHeight: 600,
+		AssetServer: &assetserver.Options{
+			Handler: proxy,
+		},
+		OnStartup: app.startup,
+		Bind: []interface{}{
+			app,
+		},
+		Mac: &mac.Options{
+			TitleBar: mac.TitleBarHiddenInset(),
+			About: &mac.AboutInfo{
+				Title:   "Daily English",
+				Message: "English learning companion\nv1.0.0",
+			},
+		},
+	}); err != nil {
+		log.Fatalf("wails error: %v", err)
+	}
+}
+
+func contentType(path string) string {
+	switch filepath.Ext(path) {
+	case ".html":
+		return "text/html; charset=utf-8"
+	case ".css":
+		return "text/css; charset=utf-8"
+	case ".js":
+		return "application/javascript; charset=utf-8"
+	case ".png":
+		return "image/png"
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".svg":
+		return "image/svg+xml"
+	case ".json":
+		return "application/json"
+	default:
+		return "application/octet-stream"
 	}
 }
 
 func seedIfFirstRun(articleRepo *repository.ArticleRepo, scenarioRepo *repository.ScenarioRepo, dataDir string) {
-	// Only seed if the scenarios table is empty — means never seeded before
 	scenarios, _ := scenarioRepo.ListTopLevel()
 	if len(scenarios) > 0 {
 		return

@@ -5,8 +5,11 @@ data/*.db-wal
 
 # Compiled binary
 daily-english
-server
+/server
 *.exe
+
+# Wails build output
+build/bin/
 
 # OS files
 .DS_Store
