@@ -1,0 +1,48 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Build
+        run: wails build -platform darwin/universal
+
+      - name: Create DMG
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          DMG_NAME="Daily-English-${VERSION}.dmg"
+          DMG_DIR=$(mktemp -d)
+
+          mkdir -p "${DMG_DIR}"
+          cp -R "build/bin/Daily English.app" "${DMG_DIR}/"
+          ln -sf /Applications "${DMG_DIR}/Applications"
+
+          hdiutil create \
+            -volname "Daily English" \
+            -srcfolder "${DMG_DIR}" \
+            -ov -format UDZO \
+            "build/${DMG_NAME}"
+
+          echo "DMG_NAME=${DMG_NAME}" >> $GITHUB_ENV
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/${{ env.DMG_NAME }}
