@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>主题配色预览</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f0f0; padding: 20px; }
+
+.top-bar {
+  text-align: center; padding: 20px 0 30px;
+}
+.top-bar h1 { font-size: 22px; color: #333; margin-bottom: 6px; }
+.top-bar p { font-size: 14px; color: #888; }
+
+/* Scheme selector */
+.scheme-selector {
+  display: flex; justify-content: center; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;
+}
+.scheme-btn {
+  padding: 8px 20px; border: 2px solid #ddd; border-radius: 20px;
+  background: #fff; font-size: 14px; cursor: pointer; transition: all .2s;
+}
+.scheme-btn:hover { border-color: #999; }
+.scheme-btn.active { border-color: #333; background: #333; color: #fff; }
+
+/* All 4 schemes side by side */
+.schemes-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px;
+}
+@media (max-width: 1200px) { .schemes-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .schemes-row { grid-template-columns: 1fr; } }
+
+/* Theme card */
+.theme-card {
+  border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  cursor: pointer; transition: transform .2s, box-shadow .2s;
+}
+.theme-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+
+.theme-card__header {
+  padding: 14px 16px; display: flex; align-items: center; gap: 8px;
+}
+.theme-card__dot {
+  width: 12px; height: 12px; border-radius: 50%;
+}
+.theme-card__name { font-size: 14px; font-weight: 600; }
+
+.theme-card__preview {
+  padding: 0 16px 16px;
+}
+
+/* Shared inner styles */
+.preview-nav {
+  display: flex; align-items: center; gap: 12px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border); margin-bottom: 12px;
+}
+.preview-logo { font-size: 15px; font-weight: 700; }
+.preview-nav-links { display: flex; gap: 10px; font-size: 12px; }
+.preview-nav-links span.active { font-weight: 600; }
+
+.preview-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; line-height: 1.4; }
+.preview-meta { font-size: 11px; margin-bottom: 12px; display: flex; gap: 8px; }
+
+.preview-sentence {
+  font-size: 14px; line-height: 2; margin-bottom: 10px;
+  font-family: "Georgia", "Times New Roman", serif;
+}
+.preview-sentence .highlight {
+  border-bottom: 2px solid; cursor: pointer; position: relative;
+}
+
+.preview-translation { font-size: 12px; margin-bottom: 12px; line-height: 1.6; }
+
+.preview-tag {
+  display: inline-block; font-size: 10px; padding: 2px 8px;
+  border-radius: 10px; margin-right: 4px;
+}
+
+.preview-btn {
+  display: inline-block; font-size: 11px; padding: 5px 12px;
+  border-radius: 6px; cursor: pointer; margin-right: 6px; margin-top: 8px;
+}
+
+.preview-word-card {
+  border-radius: 8px; padding: 10px 12px; margin-top: 10px;
+}
+
+.preview-word-main { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.preview-word-phonetic { font-size: 11px; margin-bottom: 4px; }
+.preview-word-def { font-size: 12px; line-height: 1.5; }
+
+/* Full-width preview area */
+.full-preview {
+  display: none; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,.08); max-width: 800px; margin: 0 auto;
+}
+.full-preview.show { display: block; }
+
+.full-preview__inner {
+  padding: 24px 28px;
+}
+
+.full-preview .preview-nav { gap: 20px; padding-bottom: 16px; margin-bottom: 16px; }
+.full-preview .preview-logo { font-size: 17px; }
+.full-preview .preview-nav-links { font-size: 14px; gap: 16px; }
+.full-preview .preview-title { font-size: 20px; margin-bottom: 8px; }
+.full-preview .preview-meta { font-size: 12px; margin-bottom: 16px; }
+.full-preview .preview-sentence { font-size: 16px; line-height: 2.2; margin-bottom: 14px; }
+.full-preview .preview-translation { font-size: 13px; margin-bottom: 14px; line-height: 1.7; }
+.full-preview .preview-tag { font-size: 11px; padding: 3px 10px; }
+.full-preview .preview-btn { font-size: 12px; padding: 6px 16px; margin-top: 10px; }
+.full-preview .preview-word-card { padding: 14px 16px; margin-top: 14px; }
+.full-preview .preview-word-main { font-size: 16px; }
+.full-preview .preview-word-phonetic { font-size: 12px; }
+.full-preview .preview-word-def { font-size: 13px; }
+
+/* ═══ Theme: Morandi Warm ═══ */
+.theme--morandi {
+  --bg: #FAF5EF; --surface: #F2EBE2; --border: #E8DED3;
+  --text: #3D3530; --text-secondary: #6B5F54; --text-light: #8C8078;
+  --accent: #B8956A; --accent-light: #E8D8C4; --accent-text: #fff;
+}
+.theme--morandi .theme-card__header { background: #F2EBE2; color: #3D3530; }
+.theme--morandi .theme-card__dot { background: #B8956A; }
+.theme--morandi .theme-card__preview { background: #FAF5EF; }
+.theme--morandi .preview-tag { background: #E8D8C4; color: #8B7355; }
+.theme--morandi .preview-btn--primary { background: #B8956A; color: #fff; border: none; }
+.theme--morandi .preview-btn--secondary { background: transparent; border: 1px solid #E8DED3; color: #6B5F54; }
+.theme--morandi .highlight { border-color: #B8956A; }
+.theme--morandi .preview-word-card { background: #F2EBE2; }
+
+/* ═══ Theme: Nature Earth ═══ */
+.theme--earth {
+  --bg: #F7F3ED; --surface: #EDE8E0; --border: #DDD6CB;
+  --text: #3B3024; --text-secondary: #6B5E4E; --text-light: #7A6E60;
+  --accent: #7D8C72; --accent-light: #D6DED0; --accent-text: #fff;
+}
+.theme--earth .theme-card__header { background: #EDE8E0; color: #3B3024; }
+.theme--earth .theme-card__dot { background: #7D8C72; }
+.theme--earth .theme-card__preview { background: #F7F3ED; }
+.theme--earth .preview-tag { background: #D6DED0; color: #5A6B50; }
+.theme--earth .preview-btn--primary { background: #7D8C72; color: #fff; border: none; }
+.theme--earth .preview-btn--secondary { background: transparent; border: 1px solid #DDD6CB; color: #6B5E4E; }
+.theme--earth .highlight { border-color: #7D8C72; }
+.theme--earth .preview-word-card { background: #EDE8E0; }
+
+/* ═══ Theme: Quiet Blue ═══ */
+.theme--blue {
+  --bg: #F0F3F7; --surface: #E4E9EF; --border: #D0D8E2;
+  --text: #2A3040; --text-secondary: #5A6578; --text-light: #7A8599;
+  --accent: #6B8AAD; --accent-light: #D0DBE8; --accent-text: #fff;
+}
+.theme--blue .theme-card__header { background: #E4E9EF; color: #2A3040; }
+.theme--blue .theme-card__dot { background: #6B8AAD; }
+.theme--blue .theme-card__preview { background: #F0F3F7; }
+.theme--blue .preview-tag { background: #D0DBE8; color: #4A6078; }
+.theme--blue .preview-btn--primary { background: #6B8AAD; color: #fff; border: none; }
+.theme--blue .preview-btn--secondary { background: transparent; border: 1px solid #D0D8E2; color: #5A6578; }
+.theme--blue .highlight { border-color: #6B8AAD; }
+.theme--blue .preview-word-card { background: #E4E9EF; }
+
+/* ═══ Theme: Classic Eyecare ═══ */
+.theme--eyecare {
+  --bg: #F5F0E1; --surface: #EBE5D5; --border: #D8D0BD;
+  --text: #3D3929; --text-secondary: #6B6450; --text-light: #8A826E;
+  --accent: #8B7D5E; --accent-light: #DED5BC; --accent-text: #fff;
+}
+.theme--eyecare .theme-card__header { background: #EBE5D5; color: #3D3929; }
+.theme--eyecare .theme-card__dot { background: #8B7D5E; }
+.theme--eyecare .theme-card__preview { background: #F5F0E1; }
+.theme--eyecare .preview-tag { background: #DED5BC; color: #6B6450; }
+.theme--eyecare .preview-btn--primary { background: #8B7D5E; color: #fff; border: none; }
+.theme--eyecare .preview-btn--secondary { background: transparent; border: 1px solid #D8D0BD; color: #6B6450; }
+.theme--eyecare .highlight { border-color: #8B7D5E; }
+.theme--eyecare .preview-word-card { background: #EBE5D5; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>主题配色预览</h1>
+  <p>点击下方卡片可查看大图预览</p>
+</div>
+
+<div class="schemes-row">
+
+  <!-- Morandi Warm -->
+  <div class="theme-card theme--morandi" onclick="showFull('morandi')">
+    <div class="theme-card__header">
+      <div class="theme-card__dot"></div>
+      <div class="theme-card__name">莫兰迪暖调</div>
+    </div>
+    <div class="theme-card__preview">
+      <div class="preview-nav">
+        <div class="preview-logo">Daily English</div>
+        <div class="preview-nav-links"><span>阅读</span><span class="active">生词</span><span>设置</span></div>
+      </div>
+      <div class="preview-title">The Secret to a Good Morning</div>
+      <div class="preview-meta"><span style="color:var(--text-light)">初级</span><span style="color:var(--text-light)">BBC</span></div>
+      <div class="preview-sentence">
+        The best way to start your day is with a <span class="highlight" style="color:var(--accent)">warm</span> cup of tea and a good book.
+      </div>
+      <div class="preview-translation" style="color:var(--text-secondary)">开始新一天最好的方式，是来一杯热茶和一本好书。</div>
+      <div>
+        <span class="preview-tag">日常</span>
+        <span class="preview-tag">晨间</span>
+      </div>
+      <button class="preview-btn preview-btn--primary">加入生词</button>
+      <button class="preview-btn preview-btn--secondary">AI 翻译</button>
+      <div class="preview-word-card">
+        <div class="preview-word-main">warm</div>
+        <div class="preview-word-phonetic" style="color:var(--text-light)">/wɔːm/</div>
+        <div class="preview-word-def" style="color:var(--text-secondary)">adj. 温暖的；热情的</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nature Earth -->
+  <div class="theme-card theme--earth" onclick="showFull('earth')">
+    <div class="theme-card__header">
+      <div class="theme-card__dot"></div>
+      <div class="theme-card__name">自然大地色</div>
+    </div>
+    <div class="theme-card__preview">
+      <div class="preview-nav">
+        <div class="preview-logo">Daily English</div>
+        <div class="preview-nav-links"><span>阅读</span><span class="active">生词</span><span>设置</span></div>
+      </div>
+      <div class="preview-title">The Secret to a Good Morning</div>
+      <div class="preview-meta"><span style="color:var(--text-light)">初级</span><span style="color:var(--text-light)">BBC</span></div>
+      <div class="preview-sentence">
+        The best way to start your day is with a <span class="highlight" style="color:var(--accent)">warm</span> cup of tea and a good book.
+      </div>
+      <div class="preview-translation" style="color:var(--text-secondary)">开始新一天最好的方式，是来一杯热茶和一本好书。</div>
+      <div>
+        <span class="preview-tag">日常</span>
+        <span class="preview-tag">晨间</span>
+      </div>
+      <button class="preview-btn preview-btn--primary">加入生词</button>
+      <button class="preview-btn preview-btn--secondary">AI 翻译</button>
+      <div class="preview-word-card">
+        <div class="preview-word-main">warm</div>
+        <div class="preview-word-phonetic" style="color:var(--text-light)">/wɔːm/</div>
+        <div class="preview-word-def" style="color:var(--text-secondary)">adj. 温暖的；热情的</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiet Blue -->
+  <div class="theme-card theme--blue" onclick="showFull('blue')">
+    <div class="theme-card__header">
+      <div class="theme-card__dot"></div>
+      <div class="theme-card__name">静谧蓝调</div>
+    </div>
+    <div class="theme-card__preview">
+      <div class="preview-nav">
+        <div class="preview-logo">Daily English</div>
+        <div class="preview-nav-links"><span>阅读</span><span class="active">生词</span><span>设置</span></div>
+      </div>
+      <div class="preview-title">The Secret to a Good Morning</div>
+      <div class="preview-meta"><span style="color:var(--text-light)">初级</span><span style="color:var(--text-light)">BBC</span></div>
+      <div class="preview-sentence">
+        The best way to start your day is with a <span class="highlight" style="color:var(--accent)">warm</span> cup of tea and a good book.
+      </div>
+      <div class="preview-translation" style="color:var(--text-secondary)">开始新一天最好的方式，是来一杯热茶和一本好书。</div>
+      <div>
+        <span class="preview-tag">日常</span>
+        <span class="preview-tag">晨间</span>
+      </div>
+      <button class="preview-btn preview-btn--primary">加入生词</button>
+      <button class="preview-btn preview-btn--secondary">AI 翻译</button>
+      <div class="preview-word-card">
+        <div class="preview-word-main">warm</div>
+        <div class="preview-word-phonetic" style="color:var(--text-light)">/wɔːm/</div>
+        <div class="preview-word-def" style="color:var(--text-secondary)">adj. 温暖的；热情的</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Classic Eyecare -->
+  <div class="theme-card theme--eyecare" onclick="showFull('eyecare')">
+    <div class="theme-card__header">
+      <div class="theme-card__dot"></div>
+      <div class="theme-card__name">护眼经典</div>
+    </div>
+    <div class="theme-card__preview">
+      <div class="preview-nav">
+        <div class="preview-logo">Daily English</div>
+        <div class="preview-nav-links"><span>阅读</span><span class="active">生词</span><span>设置</span></div>
+      </div>
+      <div class="preview-title">The Secret to a Good Morning</div>
+      <div class="preview-meta"><span style="color:var(--text-light)">初级</span><span style="color:var(--text-light)">BBC</span></div>
+      <div class="preview-sentence">
+        The best way to start your day is with a <span class="highlight" style="color:var(--accent)">warm</span> cup of tea and a good book.
+      </div>
+      <div class="preview-translation" style="color:var(--text-secondary)">开始新一天最好的方式，是来一杯热茶和一本好书。</div>
+      <div>
+        <span class="preview-tag">日常</span>
+        <span class="preview-tag">晨间</span>
+      </div>
+      <button class="preview-btn preview-btn--primary">加入生词</button>
+      <button class="preview-btn preview-btn--secondary">AI 翻译</button>
+      <div class="preview-word-card">
+        <div class="preview-word-main">warm</div>
+        <div class="preview-word-phonetic" style="color:var(--text-light)">/wɔːm/</div>
+        <div class="preview-word-def" style="color:var(--text-secondary)">adj. 温暖的；热情的</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Full preview -->
+<div class="scheme-selector">
+  <button class="scheme-btn active" onclick="switchTheme('morandi',this)">莫兰迪暖调</button>
+  <button class="scheme-btn" onclick="switchTheme('earth',this)">自然大地色</button>
+  <button class="scheme-btn" onclick="switchTheme('blue',this)">静谧蓝调</button>
+  <button class="scheme-btn" onclick="switchTheme('eyecare',this)">护眼经典</button>
+</div>
+
+<div class="full-preview show theme--morandi" id="fullPreview">
+  <div class="full-preview__inner">
+    <div class="preview-nav">
+      <div class="preview-logo">Daily English</div>
+      <div class="preview-nav-links"><span>阅读</span><span class="active" style="font-weight:600">生词</span><span>导入</span><span>设置</span></div>
+    </div>
+    <div class="preview-title">The Secret to a Good Morning Routine</div>
+    <div class="preview-meta">
+      <span style="color:var(--text-light)">初级</span>
+      <span style="color:var(--text-light)">BBC Learning English</span>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:16px;">
+      <span class="preview-tag">日常</span>
+      <span class="preview-tag">晨间</span>
+      <span class="preview-tag">习惯</span>
+    </div>
+
+    <div class="preview-sentence">
+      The best way to start your day is with a <span class="highlight" style="color:var(--accent)">warm</span> cup of tea and a <span class="highlight" style="color:var(--accent)">good</span> book. Research shows that people who read in the morning feel more <span class="highlight" style="color:var(--accent)">relaxed</span> throughout the day.
+    </div>
+    <div class="preview-translation" style="color:var(--text-secondary)">开始新一天最好的方式，是来一杯热茶和一本好书。研究表明，早上阅读的人一整天都更放松。</div>
+
+    <div class="preview-sentence">
+      It's also important to <span class="highlight" style="color:var(--accent)">avoid</span> checking your phone first thing. Instead, try spending ten minutes on something <span class="highlight" style="color:var(--accent)">meaningful</span>.
+    </div>
+    <div class="preview-translation" style="color:var(--text-secondary)">同样重要的是，不要一起床就刷手机。试着花十分钟做些有意义的事。</div>
+
+    <div style="margin-top:12px;">
+      <button class="preview-btn preview-btn--primary">加入生词</button>
+      <button class="preview-btn preview-btn--secondary">AI 翻译</button>
+      <button class="preview-btn preview-btn--secondary">AI 解析</button>
+    </div>
+
+    <div class="preview-word-card">
+      <div class="preview-word-main">relaxed <span style="font-size:11px;color:var(--text-light)">/rɪˈlækst/</span></div>
+      <div class="preview-word-def" style="color:var(--text-secondary);margin-top:4px;">adj. 放松的，轻松的</div>
+    </div>
+
+    <div class="preview-word-card" style="margin-top:8px;">
+      <div class="preview-word-main">meaningful <span style="font-size:11px;color:var(--text-light)">/ˈmiːnɪŋfʊl/</span></div>
+      <div class="preview-word-def" style="color:var(--text-secondary);margin-top:4px;">adj. 有意义的，重要的</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTheme(name, btn) {
+  document.querySelectorAll('.scheme-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  var preview = document.getElementById('fullPreview');
+  preview.className = 'full-preview show theme--' + name;
+}
+
+function showFull(name) {
+  var preview = document.getElementById('fullPreview');
+  preview.className = 'full-preview show theme--' + name;
+  document.querySelectorAll('.scheme-btn').forEach(function(b) {
+    b.classList.remove('active');
+    if (b.textContent.indexOf(name === 'morandi' ? '莫兰迪' : name === 'earth' ? '大地' : name === 'blue' ? '蓝调' : '护眼') > -1) {
+      b.classList.add('active');
+    }
+  });
+  preview.scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>

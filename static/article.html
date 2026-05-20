@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily English — 文章阅读</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    /* ── Tokens (article page extensions) ── */
+    :root {
+      --danger: #FF4D4F;
+      --text-xs: 11px;
+      --text-sm: 13px;
+      --font-en: Georgia, 'Iowan Old Style', 'Charter', serif;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --gap: 12px;
+    }
+
+    /* ── Reading layout ── */
+    .read-layout {
+        display: flex;
+        gap: 0;
+        max-width: 1200px;
+        margin: 0 auto;
+        min-height: calc(100vh - 60px);
+    }
+
+    .read-main {
+        flex: 1;
+        min-width: 0;
+        padding: 0 32px 24px 24px;
+    }
+
+    @media (max-width: 768px) {
+      .read-layout {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+    }
+
+    /* ── Read container ── */
+    .read-container {
+        max-width: 720px;
+        margin: 0 auto;
+    }
+
+    .read-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.4;
+        margin-bottom: 4px;
+    }
+
+    .read-subtitle {
+        font-size: 14px;
+        color: var(--text-light);
+        margin-bottom: 8px;
+    }
+
+    .read-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        font-size: 12px;
+        color: var(--text-light);
+        margin-bottom: 20px;
+    }
+
+    .read-meta__tag {
+        display: inline-block;
+        padding: 2px 8px;
+        background: var(--bg);
+        border-radius: 10px;
+        font-size: 11px;
+    }
+
+    .read-block {
+        margin-bottom: 16px;
+    }
+
+    .read-block__label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 12px;
+    }
+
+    .read-block__label svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .read-english {
+        font-family: var(--font-en);
+        font-size: 17px;
+        line-height: 2;
+        color: var(--text);
+        letter-spacing: 0.01em;
+    }
+
+    .read-english.collapsible {
+        max-height: 300px;
+        overflow: hidden;
+        position: relative;
+        transition: max-height 0.3s ease;
+    }
+
+    .read-english.collapsed::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 80px;
+        background: linear-gradient(transparent, var(--white));
+    }
+
+    .read-english.collapsible.expanded {
+        max-height: none;
+    }
+
+    .web-import-content {
+        font-family: var(--font-sans);
+        font-size: 15px;
+    }
+
+    .web-import-content p {
+        margin: 8px 0;
+        line-height: 1.8;
+    }
+
+    .web-import-content h1, .web-import-content h2, .web-import-content h3 {
+        margin: 16px 0 8px;
+    }
+
+    .read-paragraph {
+        margin-bottom: 12px;
+    }
+
+    .read-sentence {
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 2px 4px;
+        transition: background 0.15s;
+        line-height: 2;
+    }
+
+    .read-sentence:hover {
+        background: rgba(0,0,0,0.035);
+    }
+
+    .read-sentence--active {
+        background: rgba(7,193,96,0.1);
+        border-radius: 4px;
+    }
+
+    .read-word {
+        cursor: pointer;
+        border-radius: 3px;
+        padding: 0 2px;
+        transition: all 0.15s;
+        display: inline;
+    }
+
+    .read-word:hover {
+        background: rgba(0,0,0,0.07);
+    }
+
+    .read-highlight {
+        background: rgba(82,196,26,0.18);
+        font-weight: 500;
+    }
+
+    .read-word--saved {
+        background: rgba(7,193,96,0.15);
+    }
+
+    .read-section-divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 20px 0;
+    }
+
+    .read-context {
+        background: var(--bg);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin: 16px 0;
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .read-takeaway {
+        background: var(--bg);
+        border-radius: 12px;
+        padding: 16px;
+        margin: 16px 0;
+    }
+
+    .read-takeaway__title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .read-takeaway__text {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .words-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin: 12px 0;
+    }
+
+    @media (min-width: 640px) {
+      .words-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+    }
+
+    .word-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        transition: border-color 0.15s;
+    }
+
+    .word-card:hover {
+        border-color: var(--green);
+    }
+
+    .word-card__head {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .word-card__en {
+        font-family: var(--font-en);
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--text);
+    }
+
+    .word-card__phonetic {
+        font-family: var(--font-en);
+        font-size: 12px;
+        color: var(--text-light);
+    }
+
+    .word-card__cn {
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+
+    .word-card__desc {
+        font-size: 12px;
+        color: var(--text-light);
+        margin-top: 6px;
+        line-height: 1.5;
+    }
+
+    .word-card__tip {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+
+    .word-card__related {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 6px;
+    }
+
+    .word-card__tag {
+        display: inline-block;
+        padding: 2px 8px;
+        background: var(--bg);
+        border-radius: 10px;
+        font-size: 11px;
+        color: var(--text-light);
+    }
+
+    /* ── Segments / Dialogue ── */
+    .seg-block {
+        margin-bottom: 4px;
+    }
+
+    .seg-dialogue {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .seg-speaker {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--green);
+        margin-bottom: 2px;
+    }
+
+    .seg-dialogue-bubble {
+        background: var(--bg);
+        border-radius: 12px 12px 12px 4px;
+        padding: 10px 16px;
+        display: inline-block;
+        max-width: 92%;
+    }
+
+    .seg-dialogue-text {
+        font-family: var(--font-en);
+        line-height: 1.9;
+        font-size: 16px;
+    }
+
+    .seg-scene-break {
+        height: 20px;
+        border-bottom: 1px dashed var(--border);
+        margin: 12px 0;
+    }
+
+    /* ── Mode bar ── */
+    /* ── Navigation ── */
+    .read-nav {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: var(--gap) 0;
+    }
+
+    .read-nav .btn {
+        flex: 1;
+    }
+
+    /* Section navigation */
+    .section-nav {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 12px 0;
+        margin: 12px 0;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        background: var(--white);
+    }
+
+    .section-nav__label {
+        font-size: 12px;
+        color: var(--text-light);
+        font-weight: 500;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    .section-nav__btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 16px;
+        border: 1px solid var(--border);
+        background: var(--white);
+        color: var(--text);
+        border-radius: var(--radius-full);
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .section-nav__btn:hover:not(:disabled) {
+        border-color: var(--green);
+        color: var(--green);
+    }
+
+    .section-nav__btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    .section-nav__progress {
+        height: 3px;
+        background: var(--bg);
+        border-radius: 2px;
+        margin-top: 4px;
+    }
+
+    .section-nav__progress-fill {
+        height: 100%;
+        background: var(--green);
+        border-radius: 2px;
+        transition: width 0.3s;
+    }
+
+    .section-sentence {
+        line-height: 2;
+        padding: 3px 0;
+        min-height: 1.4em;
+        font-family: var(--font-en);
+        font-size: 17px;
+    }
+
+    .section-translation {
+        margin-top: 8px;
+        padding: 10px 14px;
+        background: var(--bg);
+        border-radius: var(--radius-md);
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.7;
+    }
+
+    .section-translation__label {
+        font-size: 11px;
+        color: var(--text-light);
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+        width: 240px;
+        flex-shrink: 0;
+        padding: 16px 12px;
+        max-height: calc(100vh - 60px);
+        overflow-y: auto;
+        position: sticky;
+        top: 60px;
+        border-left: 1px solid var(--border);
+    }
+
+    .sidebar-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 8px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background 0.15s;
+    }
+
+    .sidebar-item:hover {
+        background: var(--bg);
+    }
+
+    .sidebar-item.active {
+        background: var(--bg);
+    }
+
+    .sidebar-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .sidebar-dot.new {
+        background: var(--border);
+    }
+
+    .sidebar-dot.learning {
+        background: var(--green);
+    }
+
+    .sidebar-dot.mastered {
+        background: var(--green);
+    }
+
+    .sidebar-word {
+        font-family: var(--font-en);
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .sidebar-word-def {
+        font-size: 11px;
+        color: var(--text-light);
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sidebar-card {
+        display: none;
+        padding: 8px;
+        background: var(--bg);
+        border-radius: 6px;
+        margin: 2px 0 6px;
+    }
+
+    .sidebar-card.open {
+        display: block;
+    }
+
+    .sidebar-card__head {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        margin-bottom: 4px;
+    }
+
+    .sidebar-card__word {
+        font-family: var(--font-en);
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .sidebar-card__phonetic {
+        font-size: 11px;
+        color: var(--text-light);
+    }
+
+    .sidebar-card__pos {
+        display: inline-block;
+        padding: 1px 6px;
+        background: var(--bg);
+        border-radius: 4px;
+        font-size: 10px;
+        color: var(--text-light);
+        margin-bottom: 4px;
+    }
+
+    .sidebar-card__def {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+    }
+
+    .sidebar-card__tip {
+        font-size: 11px;
+        color: var(--text-light);
+        margin-bottom: 6px;
+        line-height: 1.4;
+    }
+
+    .sidebar-card__tip-icon {
+        margin-right: 4px;
+    }
+
+    .sidebar-card__related {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 6px;
+    }
+
+    .sidebar-card__related-tag {
+        display: inline-block;
+        padding: 2px 6px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 10px;
+        cursor: pointer;
+    }
+
+    .sidebar-card__actions {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+
+    .sidebar-card__btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 3px 8px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-size: 10px;
+        cursor: pointer;
+        background: var(--white);
+        color: var(--text-secondary);
+        transition: all 0.15s;
+    }
+
+    .sidebar-card__btn--speak:hover {
+        color: var(--text);
+        border-color: var(--text);
+    }
+
+    .sidebar-card__btn--locate {
+        background: var(--bg);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+    }
+
+    .sidebar-card__btn--locate:hover {
+        border-color: var(--text-secondary);
+    }
+
+    .sidebar-card__btn--study {
+        background: var(--green);
+        color: #fff;
+    }
+
+    .sidebar-card__btn--study:hover {
+        filter: brightness(1.08);
+    }
+
+    .sidebar-card__btn--study.added {
+        background: var(--green-light);
+        color: var(--green);
+        border: 1px solid var(--green);
+    }
+
+    .sidebar-progress {
+        margin-top: 12px;
+    }
+
+    .sidebar-progress-label {
+        font-size: 11px;
+        color: var(--text-light);
+        margin-bottom: 4px;
+    }
+
+    .sidebar-progress-bar {
+        height: 4px;
+        background: var(--bg);
+        border-radius: 2px;
+    }
+
+    .sidebar-progress-fill {
+        height: 100%;
+        background: var(--green);
+        border-radius: 2px;
+        transition: width 0.3s;
+    }
+
+    /* ── Word panel (left bottom) ── */
+    .word-panel {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 340px;
+        max-height: 45vh;
+        background: var(--white);
+        border-top: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        border-radius: 0 14px 0 0;
+        padding: 18px;
+        overflow-y: auto;
+        z-index: 100;
+        box-shadow: 2px -4px 24px rgba(0,0,0,0.08);
+    }
+
+    @media (max-width: 768px) {
+      .word-panel {
+        width: 100%;
+        left: 0;
+        border-radius: 0;
+        border-right: none;
+      }
+    }
+
+    .word-panel__word {
+        font-family: var(--font-en);
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .word-panel__source {
+        display: inline-block;
+        margin-top: 4px;
+        padding: 2px 8px;
+        background: var(--bg);
+        border-radius: 4px;
+        font-size: 10px;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    .word-panel__source--ai {
+        background: rgba(147,112,219,0.1);
+        color: #9370DB;
+    }
+
+    .word-panel__phonetic {
+        font-family: var(--font-en);
+        font-size: 12px;
+        color: var(--text-light);
+        margin-top: 2px;
+    }
+
+    .word-panel__cn {
+        color: var(--text);
+        font-weight: 600;
+        font-size: 15px;
+        margin-top: 8px;
+    }
+
+    .word-panel__desc {
+        color: var(--text-secondary);
+        margin-top: 6px;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .word-panel__hint {
+        color: var(--text-light);
+        font-size: 12px;
+    }
+
+    .word-panel__sentence {
+        color: var(--text);
+        line-height: 1.7;
+        font-size: 14px;
+    }
+
+    .word-panel__study-btn {
+        display: block;
+        margin-top: 12px;
+        padding: 7px 0;
+        width: 100%;
+        border: 1px solid var(--green);
+        background: none;
+        color: var(--green);
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .word-panel__study-btn:hover {
+        background: var(--green);
+        color: #fff;
+    }
+
+    .word-panel__study-btn--remove {
+        border-color: var(--border);
+        color: var(--text-light);
+    }
+
+    .word-panel__study-btn--remove:hover {
+        border-color: var(--danger);
+        color: var(--danger);
+        background: none;
+    }
+
+    .word-panel__study-badge {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 1px 6px;
+        background: rgba(7,193,96,0.1);
+        color: var(--green);
+        font-size: 10px;
+        font-weight: 600;
+        border-radius: var(--radius-sm);
+    }
+
+    .word-panel__analyze-btn {
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+        padding: 8px 0;
+        border: 1px solid var(--green);
+        background: none;
+        color: var(--green);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+    }
+
+    .word-panel__analyze-btn:hover {
+        background: var(--green);
+        color: #fff;
+    }
+
+    .word-panel__analyze-result {
+        margin-top: 10px;
+        padding: 8px 10px;
+        background: var(--bg);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .word-panel__analyze-words {
+        margin-top: 8px;
+    }
+
+    .word-panel__analyze-word {
+        display: inline-block;
+        margin: 2px 4px 2px 0;
+        padding: 2px 8px;
+        background: rgba(7,193,96,0.1);
+        color: var(--green);
+        border-radius: 10px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    /* Study word visual distinction */
+    .read-study-word {
+        background: rgba(147, 112, 219, 0.15);
+        border-radius: 3px;
+        padding: 1px 3px;
+    }
+
+    /* ── Word popup ── */
+    .word-popup {
+        display: none;
+        position: fixed;
+        z-index: 200;
+        width: 320px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+
+    .word-popup__word {
+        font-family: var(--font-en);
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .word-popup__phonetic {
+        font-size: 12px;
+        color: var(--text-light);
+        margin-top: 2px;
+    }
+
+    .word-popup__def {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-top: 6px;
+    }
+
+    .word-popup__actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    /* ── Animations ── */    @keyframes fadeIn {
+        from {
+       opacity: 0;
+        transform: translateY(8px);
+        }
+     to {
+       opacity: 1;
+        transform: translateY(0);
+        };
+    }
+
+    @keyframes slideInRight {
+        from {
+       opacity: 0;
+        transform: translateX(20px);
+        }
+     to {
+       opacity: 1;
+        transform: translateX(0);
+        };
+    }
+
+    @keyframes shake {
+        0%,100% {
+       transform: translateX(0);
+        }
+     25% {
+       transform: translateX(-4px);
+        }
+     75% {
+       transform: translateX(4px);
+        };
+    }
+
+    @keyframes bounce {
+        0%,100% {
+       transform: translateY(0);
+        }
+     50% {
+       transform: translateY(-6px);
+        };
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    /* ── AI Panel ── */
+    .ai-panel {
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 380px;
+        height: 100vh;
+        background: var(--white);
+        border-left: 1px solid var(--border);
+        z-index: 300;
+        transition: right 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ai-panel.open {
+        right: 0;
+    }
+
+    .ai-panel__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .ai-panel__title {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .ai-panel__close {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background: var(--bg);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ai-panel__body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 20px;
+    }
+
+    .ai-panel__footer {
+        padding: 12px 20px;
+        border-top: 1px solid var(--border);
+    }
+
+    body.ai-panel-open {
+        overflow: hidden;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-top">
+      <a href="home.html" class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        Daily English
+      </a>
+      <nav class="nav-tabs">
+        <a href="home.html" class="nav-tab active">阅读</a>
+        <a href="home.html?tab=vocab" class="nav-tab">生词</a>
+        <a href="import.html" class="nav-tab">导入</a>
+        <a href="settings.html" class="nav-tab">设置</a>
+      </nav>
+    </div>
+  </div>
+<div class="read-layout">
+<div class="read-main">
+<div class="page-content" style="max-width:100%;padding-top:16px">
+<div class="read-container">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<a class="page-back" href="javascript:history.back()" id="backLink" style="margin-bottom:0;font-size:14px;color:var(--text-light);text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="15 18 9 12 15 6"/>
+</svg>
+返回
+</a>
+<button id="deleteArticleBtn" onclick="deleteArticle()" style="display:none;padding:4px 12px;border:1px solid var(--danger);background:none;color:var(--danger);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:500;cursor:pointer">
+删除文章
+</button>
+</div>
+<!-- Vocab shortcut -->
+<div id="modeBar" style="display:none;margin:8px 0;padding:6px 0;justify-content:flex-end">
+<button id="scrollToVocabBtn" onclick="scrollToVocab()" style="padding:4px 12px;border:1px solid var(--green);background:none;color:var(--green);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:500;cursor:pointer;white-space:nowrap">
+生词 ↓
+</button>
+</div>
+<div id="articleContent">
+<div style="text-align:center;padding:40px;color:var(--text-light)">
+加载中...
+</div>
+</div>
+<div class="read-nav" id="articleNav" style="display:none">
+<button class="btn btn-primary" id="prevBtn" onclick="navigateArticle(-1)" style="background:var(--white);color:var(--text);border:1px solid var(--border)">
+← 上一篇
+</button>
+<button class="btn btn-primary" id="nextBtn" onclick="navigateArticle(1)">
+下一篇 →
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar (desktop) -->
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-title">
+本篇生词 ·
+<span id="sidebarWordCount">
+0
+</span>
+</div>
+<div id="sidebarList">
+</div>
+<div class="sidebar-progress">
+<div class="sidebar-progress-label">
+已加入生词本
+<strong id="notebookCount">
+0
+</strong>
+/
+<span id="sidebarWordCount2">
+0
+</span>
+</div>
+<div class="sidebar-progress-bar">
+<div class="sidebar-progress-fill" id="sidebarProgress" style="width:0%">
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- Word panel -->
+<div class="word-panel" id="wordPanel" style="display:none">
+<div id="wordPanelContent">
+</div>
+</div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    var articles = [];
+    var currentIdx = 0;
+    var currentArticle = null;
+    var vocabMap = {
+    };
+    var sections = [];
+    var currentSectionIdx = 0;
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function escAttr(s) {
+      return escHtml(s).replace(/'/g, '&#39;');
+    }
+    function escapeRegex(s) {
+      return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    function getVocab(word) {
+      return vocabMap[word.toLowerCase()];
+    }
+    async function loadVocabulary(articleId) {
+      try {
+        var data = await GET('/vocabulary/article-words/' + articleId);
+        vocabMap = {};
+        var words = data.words || data || [];
+        words.forEach(function(item) {
+          var v = item.vocabulary || item;
+          var key = (v.word || item.word_text || '').toLowerCase();
+          if (key) vocabMap[key] = v;
+        });
+      } catch (e) {
+        console.warn('loadVocabulary failed:', e);
+      }
+      buildSidebar();
+    }
+    function locateWordInArticle(word) {
+      var el = document.querySelector('.read-word[data-raw="' + CSS.escape(word) + '"]');
+      if (el) el.scrollIntoView({
+        behavior: 'smooth', block: 'center'
+      });
+    }
+    function speakWord(word) {
+      if ('speechSynthesis' in window) {
+        var u = new SpeechSynthesisUtterance(word);
+        u.lang = 'en-US';
+        u.rate = 0.85;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      }
+    }
+    async function loadArticle() {
+      var params = new URLSearchParams(location.search);
+      var id = params.get('id');
+      var source = params.get('source');
+      if (id) {
+        try {
+          var a = await GET('/articles/' + id);
+          articles = [a];
+          currentIdx = 0;
+          await loadVocabulary(a.id);
+          renderArticle(a);
+        } catch
+        (e) {
+          document.getElementById('articleContent').innerHTML = '<div style="text-align:center;padding:40px;color:var(--danger)">加载失败</div>';
+        }
+      } else if
+      (source) {
+        try {
+          var list = await GET('/articles?source=' + encodeURIComponent(source));
+          articles = list || [];
+          if (articles.length === 0) {
+            document.getElementById('articleContent').innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-light)">没有文章</div>';
+            return;
+          }
+          currentIdx = 0;
+          await loadVocabulary(articles[0].id);
+          renderArticle(articles[0]);
+        } catch
+        (e) {
+          document.getElementById('articleContent').innerHTML = '<div style="text-align:center;padding:40px;color:var(--danger)">加载失败</div>';
+        }
+      }
+    }
+    function editTags() {
+      if (!currentArticle) return;
+      var area = document.getElementById('tagsEditArea');
+      var tags = currentArticle.tags || [];
+      area.innerHTML = '<div class="tags-edit">' +        tags.map(function(t) {
+        return '<span class="tags-edit__tag">' + escHtml(t) + '<span class="tags-edit__remove" onclick="removeTag(this,\'' + escAttr(t) + '\')">×</span></span>';
+      })
+      .join('') +        '<input class="tags-edit__input" id="tagInput" placeholder="添加标签" onkeydown="if(event.key===\'Enter\')addTag()"></div>';
+    }
+    function addTag() {
+      var input = document.getElementById('tagInput');
+      if (!input || !input.value.trim()) return;
+      var tag = input.value.trim();
+      if (!currentArticle.tags) currentArticle.tags = [];
+      if (currentArticle.tags.indexOf(tag) >= 0) return;
+      currentArticle.tags.push(tag);
+      saveTags();
+    }
+    function removeTag(el, tag) {
+      if (!currentArticle.tags) return;
+      var idx = currentArticle.tags.indexOf(tag);
+      if (idx >= 0) currentArticle.tags.splice(idx, 1);
+      saveTags();
+    }
+    async function saveTags() {
+      try {
+        await PUT('/articles/' + currentArticle.id + '/tags', {
+          tags: currentArticle.tags
+        });
+        renderArticle(currentArticle);
+      }
+      catch(e) {
+        alert('保存标签失败');
+      }
+    }
+    function buildSidebar() {
+        var list = document.getElementById('sidebarList');
+        var words = Object.entries(vocabMap);
+        if (!list || !words.length) return;
+        var scrollY = window.scrollY;
+        document.getElementById('sidebarWordCount').textContent = words.length;
+        document.getElementById('sidebarWordCount2').textContent = words.length;
+        list.innerHTML = words.map(function(arr) {
+          var w = arr[0], d = arr[1];
+          var status = d.status || 'new';
+          var def = (d.chinese || '').split('，')[0];
+          return '<div class="sidebar-item" data-sword="' + (w||'').replace(/"/g,'&quot;') + '">' +          '<span class="sidebar-dot ' + status + '"></span>' +          '<span class="sidebar-word">' + (d.word || w) + '</span>' +          '<span class="sidebar-word-def">' + (def||'').replace(/</g,'&lt;') + '</span>' +        '</div>' +        '<div class="sidebar-card" data-card="' + (w||'').replace(/"/g,'&quot;') + '"></div>';
+        })
+        .join('');
+        list.querySelectorAll('.sidebar-item').forEach(function(el) {
+          el.addEventListener('click', function() {
+            var word = el.dataset.sword;
+            var card = el.nextElementSibling;
+            if (!card || !card.classList.contains('sidebar-card')) return;
+            // Close any other open card
+            list.querySelectorAll('.sidebar-card.open').forEach(function(c) {
+              if (c !== card) {
+                c.classList.remove('open');
+                c.previousElementSibling && c.previousElementSibling.classList.remove('active');
+              }
+            });
+            list.querySelectorAll('.sidebar-item.active').forEach(function(i) {
+              if (i !== el) i.classList.remove('active');
+            });
+            // Toggle this card
+            if (card.classList.contains('open')) {
+              card.classList.remove('open');
+              el.classList.remove('active');
+            } else {
+              var v = vocabMap[word];
+              if (v) {
+                fillSidebarCard(card, v);
+              }
+              card.classList.add('open');
+              el.classList.add('active');
+            }
+          });
+        });
+        updateSidebarProgress();
+        if (window.scrollY !== scrollY) window.scrollTo(0, scrollY);
+      }
+      function fillSidebarCard(card, v) {
+        var word = (v.word || '').toLowerCase();
+        var inStudy = v.status && v.status !== 'new';
+        var studyLabel = inStudy ? '移出生词本' : '+ 生词本';
+        var studyClass = inStudy ? ' added' : '';
+        var posTag = v.pos ? '<span class="sidebar-card__pos">' + escHtml(v.pos) + '</span>' : '';
+        var tipHtml = '';
+        if (v.memory_tip || v.explanation) {
+          var tipText = escHtml(v.memory_tip || v.explanation || '');
+          tipHtml = '<div class="sidebar-card__tip">' +          '<span class="sidebar-card__tip-icon">💡</span>' + tipText +        '</div>';
+        }
+        var relatedHtml = '';
+        if (v.related_terms) {
+          var terms = (typeof v.related_terms === 'string') ? v.related_terms.split(/[,;、，；]/) : v.related_terms;
+          if (terms && terms.length) {
+            relatedHtml = '<div class="sidebar-card__related">' +            terms.filter(function(t){
+              return t && t.trim();
+            })
+            .slice(0, 6).map(function(t) {
+              return '<span class="sidebar-card__related-tag" onclick="locateWordInArticle(\'' + escAttr(t.trim().toLowerCase()) + '\')">' + escHtml(t.trim()) + '</span>';
+            })
+            .join('') +          '</div>';
+          }
+        }
+        card.innerHTML =        '<div class="sidebar-card__head">' +          '<span class="sidebar-card__word">' + escHtml(v.word || '') + '</span>' +          (v.phonetic ? '<span class="sidebar-card__phonetic">' + escHtml(v.phonetic) + '</span>' : '') +        '</div>' +        posTag +        '<div class="sidebar-card__def">' + escHtml(v.chinese || '') + '</div>' +        tipHtml + relatedHtml +        '<div class="sidebar-card__actions">' +          '<button class="sidebar-card__btn sidebar-card__btn--speak" onclick="event.stopPropagation();speakWord(\'' + escAttr(word) + '\')" title="朗读">' +            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>' +          '</button>' +          '<button class="sidebar-card__btn sidebar-card__btn--locate" onclick="event.stopPropagation();locateWordInArticle(\'' + escAttr(word) + '\')">定位原文</button>' +          '<button class="sidebar-card__btn sidebar-card__btn--study' + studyClass + '" onclick="event.stopPropagation();toggleStudyWord(\'' + escHtml(word) + '\',' + (inStudy ? 'false' : 'true') + ').then(function(){buildSidebar()})">' + studyLabel + '</button>' +        '</div>';
+      }
+      function updateSidebarProgress() {
+        var words = Object.values(vocabMap);
+        var inNotebook = words.filter(function(d) {
+          return d.status && d.status !== 'new';
+        })
+        .length;
+        var total = words.length;
+        var el1 = document.getElementById('notebookCount');
+        var el2 = document.getElementById('sidebarProgress');
+        if (el1) el1.textContent = inNotebook;
+        if (el2) el2.style.width = (total > 0 ? (inNotebook / total * 100) : 0) + '%';
+      }
+      function wrapWebImportWords() {
+        var container = document.querySelector('.web-import-content');
+        if (!container) return;
+        var blockTags = ['P', 'LI', 'H1', 'H2', 'H3', 'H4', 'DIV', 'BLOCKQUOTE', 'TD'];
+        Array.prototype.slice.call(container.children).forEach(function(el) {
+          wrapBlockAsSentence(el, blockTags);
+        });
+      }
+      function wrapBlockAsSentence(el, blockTags) {
+        if (blockTags.indexOf(el.tagName) >= 0) {
+          var wrapper = document.createElement('div');
+          wrapper.className = 'read-sentence seg-narration';
+          el.parentNode.insertBefore(wrapper, el);
+          wrapper.appendChild(el);
+          return;
+        }
+        Array.prototype.slice.call(el.children).forEach(function(child) {
+          wrapBlockAsSentence(child, blockTags);
+        });
+      }
+      function splitSentences(text) {
+        var parts = text.match(/[^.!?]*[.!?]+[\s]*/g);
+        if (!parts) return [text];
+        var last = text.slice(parts.join('').length);
+        if (last.trim()) parts.push(last);
+        return parts.map(function(s) {
+          return s.trim();
+        })
+        .filter(function(s) {
+          return s;
+        });
+      }
+      function buildSections(a) {
+        if (!a.segments || a.segments.length === 0) return [];
+        var secs = [], current = [], count = 0;
+        for (var i = 0;
+        i < a.segments.length;
+        i++) {
+          var seg = a.segments[i];
+          current.push(seg);
+          count += splitSentences(seg.text || '').length;
+          if (count >= 10 || i === a.segments.length - 1) {
+            secs.push({
+              segments: current.slice(), sentenceCount: count
+            });
+            current = [];
+            count = 0;
+          }
+        }
+        return secs;
+      }
+      function renderSectionContent(a, sectionIdx) {
+        var sec = sections[sectionIdx];
+        if (!sec) return '';
+        var words = a.words || [], prevSpeaker = '', html = '';
+        sec.segments.forEach(function(seg) {
+          splitSentences(seg.text || '').forEach(function(sent) {
+            var s = escHtml(sent);
+            // Step 1: Mark vocabulary words with §HL§ markers
+            words.forEach(function(w) {
+              var escaped = escHtml(w.text_in_article || w.english);
+              s = s.replace(
+                new RegExp('\\b' + escapeRegex(escaped) + '\\b', 'gi'),
+                '\u00a7HL\u00a7' + escaped + '\u00a7/HL\u00a7'
+              );
+            });
+            // Step 2: Wrap all words in spans (skip markers)
+            s = s.replace(/([a-zA-Z''\-]+)/g, function(match) {
+              if (match.indexOf('\u00a7') >= 0) return match;
+              var key = match.toLowerCase();
+              return '<span class="read-word' + (getVocab(key) ? ' read-study-word' : '') + '" data-raw="' + key + '">' + match + '</span>';
+            });
+            // Step 3: Replace markers with highlight spans
+            words.forEach(function(w) {
+              var escaped = escHtml(w.text_in_article || w.english);
+              var wordKey = w.english.toLowerCase();
+              var studyClass = getVocab(wordKey) ? ' read-study-word' : '';
+              s = s.replace(
+                '\u00a7HL\u00a7' + escaped + '\u00a7/HL\u00a7',
+                '<span class="read-word read-highlight' + studyClass + '" data-raw="' + wordKey + '">' + escaped + '</span>'
+              );
+            });
+            s = s.replace(/\u00a7[^\u00a7]*\u00a7/g, '');
+            if (seg.type === 'dialogue' && seg.speaker && seg.speaker !== prevSpeaker)
+              html += '<div class="seg-speaker">' + escHtml(seg.speaker) + '</div>';
+            prevSpeaker = seg.speaker || '';
+            html += '<div class="section-sentence read-sentence">' + s + '</div>';
+          });
+          if (seg.translation) html += '<div class="section-translation">' + escHtml(seg.translation) + '</div>';
+          html += '<div style="height:8px"></div>';
+        });
+        return html;
+      }
+      function renderSectionNav() {
+        if (sections.length <= 1) return '';
+        var total = sections.length, idx = currentSectionIdx + 1;
+        var pct = Math.round(idx / total * 100);
+        return '<div class="section-nav">' +        '<button class="section-nav__btn" onclick="navigateSection(-1)"' + (currentSectionIdx <= 0 ? ' disabled' : '') + '>◀ 上一节</button>' +        '<span class="section-nav__label">Section ' + idx + ' / ' + total + '</span>' +        '<button class="section-nav__btn" onclick="navigateSection(1)"' + (currentSectionIdx >= total - 1 ? ' disabled' : '') + '>下一节 ▶</button></div>' +        '<div class="section-nav__progress"><div class="section-nav__progress-fill" style="width:' + pct + '%"></div></div>';
+      }
+      function navigateSection(dir) {
+        var newIdx = currentSectionIdx + dir;
+        if (newIdx < 0 || newIdx >= sections.length) return;
+        currentSectionIdx = newIdx;
+        renderSection();
+      }
+      function renderSection() {
+        if (!currentArticle || sections.length === 0) return;
+        var contentEl = document.getElementById('sectionContent');
+        var navTop = document.getElementById('sectionNavTop');
+        var navBottom = document.getElementById('sectionNavBottom');
+        if (!contentEl) return;
+        contentEl.innerHTML = renderSectionContent(currentArticle, currentSectionIdx);
+        if (navTop) navTop.innerHTML = renderSectionNav();
+        if (navBottom) navBottom.innerHTML = renderSectionNav();
+        bindWordEvents();
+        loadSentenceCache(currentArticle);
+        var sectionEl = document.getElementById('sectionNavTop');
+        if (sectionEl) window.scrollTo({
+          top: sectionEl.getBoundingClientRect().top + window.scrollY - 60, behavior: 'smooth'
+        });
+      }
+      function renderArticle(a) {
+        if (!a) return;
+        var savedScrollY = window.scrollY;
+        currentArticle = a;
+        window._currentArticle = a;
+
+        // Clean up AI panel state
+        var oldPanel = document.getElementById('aiPanel');
+        if (oldPanel) oldPanel.remove();
+        document.body.classList.remove('ai-panel-open');
+        document.getElementById('modeBar').style.display = 'flex';
+        document.getElementById('deleteArticleBtn').style.display = 'inline-block';
+
+        var hasSegments = a.segments && a.segments.length > 0;
+        var isDialogue = a.type === 'dialogue' || hasSegments;
+        var isWebImport = a.type === 'web_import' && a.html_content;
+        var rawText = escHtml(a.original_text || '').replace(/\r\n/g, '\n');
+
+        // Generate a consistent color from speaker name
+        function speakerColor(name) {
+          var colors = ['#4A90D9','#E67E22','#27AE60','#8E44AD','#E74C3C','#1ABC9C','#F39C12','#2980B9'];
+          var hash = 0;
+          for (var i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+          return colors[Math.abs(hash) % colors.length];
+        }
+
+        // Mark known vocabulary words
+        (a.words || []).forEach(function(w) {
+          var escaped = escHtml(w.text_in_article || w.english);
+          rawText = rawText.replace(
+            new RegExp('\\b' + escapeRegex(escaped) + '\\b', 'gi'),
+            '\u00a7HL\u00a7' + escaped + '\u00a7/HL\u00a7'
+          );
+        });
+
+        var highlightedText = '';
+
+        // Build sections for segmented articles
+        sections = [];
+        currentSectionIdx = 0;
+        if (!isWebImport && hasSegments) {
+          sections = buildSections(a);
+        }
+
+        if (isWebImport) {
+          // Web import: render HTML content directly, use event delegation for word clicks
+          highlightedText = a.html_content;
+        } else if (sections.length > 1) {
+          // Section-based reading: placeholder, will be rendered by renderSection()
+          highlightedText = '';
+        } else if (hasSegments) {
+          // Render with segment structure
+          var segIdx = 0;
+          var prevSpeaker = '';
+          var prevType = '';
+          highlightedText = (a.segments || []).map(function(seg, idx) {
+            var segText = escHtml(seg.text || '');
+
+            // Step 1: Mark vocabulary words with §HL§ markers
+            (a.words || []).forEach(function(w) {
+              var escaped = escHtml(w.text_in_article || w.english);
+              segText = segText.replace(
+                new RegExp('\\b' + escapeRegex(escaped) + '\\b', 'gi'),
+                '\u00a7HL\u00a7' + escaped + '\u00a7/HL\u00a7'
+              );
+            });
+
+            // Step 2: Wrap all words in spans (skip markers)
+            segText = segText.replace(/([a-zA-Z''\-]+)/g, function(match) {
+              if (match.indexOf('\u00a7') >= 0) return match;
+              var key = match.toLowerCase();
+              var studyClass = getVocab(key) ? ' read-study-word' : '';
+              return '<span class="read-word' + studyClass + '" data-raw="' + key + '">' + match + '</span>';
+            });
+
+            // Step 3: Replace markers with highlight spans
+            (a.words || []).forEach(function(w) {
+              var escaped = escHtml(w.text_in_article || w.english);
+              var wordKey = w.english.toLowerCase();
+              var studyClass = getVocab(wordKey) ? ' read-study-word' : '';
+              segText = segText.replace(
+                '\u00a7HL\u00a7' + escaped + '\u00a7/HL\u00a7',
+                '<span class="read-word read-highlight' + studyClass + '" data-raw="' + wordKey + '">' + escaped + '</span>'
+              );
+            });
+            segText = segText.replace(/\u00a7[^\u00a7]*\u00a7/g, '');
+
+            var typeClass = 'seg-' + (seg.type || 'narration');
+            var breakHtml = '';
+            if (idx > 0 && prevType !== 'dialogue' && seg.type === 'dialogue') {
+              breakHtml = '<div class="seg-scene-break"></div>';
+            }
+            prevSpeaker = seg.speaker || '';
+            prevType = seg.type || '';
+            var sidx = segIdx++;
+            if (seg.type === 'dialogue' && seg.speaker) {
+              return breakHtml + '<div class="seg-block read-sentence seg-dialogue" data-sidx="' + sidx + '">' +
+                '<div class="seg-speaker">' + escHtml(seg.speaker) + '</div>' +
+                '<div class="seg-dialogue-bubble"><div class="seg-dialogue-text">' + segText + '</div></div>' +
+              '</div>';
+            }
+            return breakHtml + '<div class="seg-block read-sentence ' + typeClass + '" data-sidx="' + sidx + '">' +
+              segText +
+            '</div>';
+          })
+          .join('');
+        } else {
+          // Fallback: split by paragraphs, then sentences
+          var paragraphs = rawText.split(/\n+/);
+          highlightedText = paragraphs.map(function(para) {
+            if (!para.trim()) return '';
+            var sentences = para.match(/[^.!?]*[.!?]+[\s]*/g) || [para];
+            var sIdx = 0;
+            var inner = sentences.map(function(block) {
+              var wrapped = block.replace(/([a-zA-Z''\-]+)/g, function(match) {
+                if (match.indexOf('\u00a7') >= 0) return match;
+                var key = match.toLowerCase();
+                var studyClass = getVocab(key) ? ' read-study-word' : '';
+                return '<span class="read-word' + studyClass + '" data-raw="' + key + '">' + match + '</span>';
+              });
+              (a.words || []).forEach(function(w) {
+                var escaped = escHtml(w.text_in_article || w.english);
+                var wordKey = w.english.toLowerCase();
+                var studyClass = getVocab(wordKey) ? ' read-study-word' : '';
+                wrapped = wrapped.replace(
+                  '\u00a7HL\u00a7' + escaped + '\u00a7/HL\u00a7',
+                  '<span class="read-word read-highlight' + studyClass + '" data-raw="' + wordKey + '">' + escaped + '</span>'
+                );
+              });
+              wrapped = wrapped.replace(/\u00a7[^\u00a7]*\u00a7/g, '');
+              var idx = sIdx++;
+              return '<div class="read-sentence seg-narration" data-sidx="' + idx + '">' + wrapped + '</div>';
+            })
+            .join('');
+            return '<div class="read-paragraph">' + inner + '</div>';
+          })
+          .join('');
+        }
+
+        // Words HTML
+        var wordsHtml = (a.words || []).map(function(w) {
+          var tipHtml = w.memory_tip ? '<div class="word-card__tip">\ud83d\udca1 ' + escHtml(w.memory_tip) + '</div>' : '';
+          var relatedHtml = (w.related_terms || []).length > 0 ?
+            '<div class="word-card__related">' + w.related_terms.map(function(r) {
+              return '<span class="word-card__tag">' + escHtml(r) + '</span>';
+            }).join('') + '</div>' : '';
+          return '<div class="word-card animate-fade-in">' +
+            '<div class="word-card__head">' +
+              '<span class="word-card__en" style="cursor:pointer" onclick="locateWordInArticle(\'' + escAttr(w.english) + '\')">' + escHtml(w.english) + '</span>' +
+              (w.phonetic ? '<span class="word-card__phonetic">' + escHtml(w.phonetic) + '</span>' : '') +
+              '<span class="word-card__cn">' + escHtml(w.chinese) + '</span>' +
+            '</div>' +
+            (w.explanation ? '<div class="word-card__desc">' + escHtml(w.explanation) + '</div>' : '') +
+            tipHtml + relatedHtml +
+          '</div>';
+        })
+        .join('');
+
+        var diffLabels = ['', '\u5165\u95e8', '\u57fa\u7840', '\u8fdb\u9636', '\u9ad8\u7ea7', '\u6311\u6218'];
+        var diffLabel = diffLabels[a.difficulty] || 'Lv.' + a.difficulty;
+        var typeLabel = a.type === 'dialogue' ? '\u5bf9\u8bdd' : (isWebImport ? '\u7f51\u9875\u5bfc\u5165' : '\u77ed\u6587');
+        var tagsHtml = '';
+        if (a.tags && a.tags.length > 0) {
+          tagsHtml = a.tags.map(function(t) {
+            return '<span class="read-meta__tag">' + escHtml(t) + '</span>';
+          }).join('');
+        } else {
+          tagsHtml = '<span class="read-meta__tag">' + escHtml(typeLabel) + '</span>';
+        }
+
+        var html = '' +
+          '<div class="animate-fade-in">' +
+            '<div class="read-title">' + escHtml(a.title_en || '') + '</div>' +
+            (a.title_zh ? '<div class="read-subtitle">' + escHtml(a.title_zh || '') + '</div>' : '') +
+            '<div class="read-meta">' +
+              tagsHtml +
+              '<span>' + escHtml(diffLabel) + '</span>' +
+              (a.source ? '<span>' + escHtml(a.source) + '</span>' : '') +
+              '<span style="cursor:pointer;margin-left:4px" onclick="editTags()" title="\u7f16\u8f91\u6807\u7b7e"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>' +
+            '</div>' +
+            '<div id="tagsEditArea"></div>' +
+          '</div>' +
+          '<div class="read-block animate-fade-in">' +
+            '<div class="read-english' + (isWebImport ? ' web-import-content' : (hasSegments ? '' : ' collapsible collapsed')) + '" id="collapse_en">' +
+              (sections.length > 1 ? '<div id="sectionNavTop"></div><div id="sectionContent"></div><div id="sectionNavBottom"></div>' : highlightedText) +
+            '</div>' +
+          '</div>';
+
+        if (a.context_note) {
+          html += '<div class="read-context animate-fade-in">\ud83d\udccd ' + escHtml(a.context_note) + '</div>';
+        }
+
+        // Render the article content
+        document.getElementById('articleContent').innerHTML = html;
+
+        // Navigation buttons
+        document.getElementById('prevBtn').disabled = currentIdx <= 0;
+        document.getElementById('prevBtn').style.opacity = currentIdx <= 0 ? '0.4' : '1';
+        document.getElementById('nextBtn').disabled = currentIdx >= articles.length - 1;
+        document.getElementById('nextBtn').style.opacity = currentIdx >= articles.length - 1 ? '0.4' : '1';
+
+        loadSentenceCache(a);
+        wrapWebImportWords();
+
+        // Render first section if sectioned
+        if (sections.length > 1) {
+          renderSection();
+        } else {
+          bindWordEvents();
+        }
+
+        // Restore scroll: keep position for same article, scroll to top for new article
+        if (window._lastRenderedId === a.id) {
+          window.scrollTo(0, savedScrollY);
+        } else {
+          window.scrollTo(0, 0);
+        }
+        window._lastRenderedId = a.id;
+
+      }
+
+      async function toggleStudyWord(word, add) {
+        try {
+          if (add) {
+            var res = await fetch('/api/vocabulary/study/add', {
+              method: 'POST',            headers: {
+                'Content-Type': 'application/json'
+              }
+              ,            body: JSON.stringify({
+                word: word, article_id: currentArticle ? currentArticle.id : ''
+              })
+            });
+            var data = await res.json();
+            if (data.vocabulary) vocabMap[word] = data.vocabulary;
+          } else {
+            await POST('/vocabulary/study/remove', {
+              word: word
+            });
+            delete vocabMap[word];
+          }
+          var v = vocabMap[word];
+          if (v) showPanelWord(v);
+          document.querySelectorAll('.read-word[data-raw="' + CSS.escape(word) + '"]').forEach(function(el) {
+            if (add) {
+              el.classList.add('read-word--saved');
+            } else {
+              el.classList.remove('read-word--saved');
+            }
+          });
+        } catch
+        (e) {
+          alert('操作失败: ' + e.message);
+        }
+      }
+      function scrollToVocab() {
+        var vocabSection = document.querySelector('.words-grid');
+        if (vocabSection) vocabSection.scrollIntoView({
+          behavior: 'smooth', block: 'start'
+        });
+      }
+      function scrollToTop() {
+        window.scrollTo({
+          top: 0, behavior: 'smooth'
+        });
+      }
+      async function deleteArticle() {
+        if (!currentArticle) return;
+        if (!confirm('确认删除这篇文章？删除后不可恢复。')) return;
+        try {
+          await fetch('/api/articles/' + currentArticle.id, { method: 'DELETE' });
+          location.href = 'home.html';
+        } catch (e) {
+          alert('删除失败: ' + e.message);
+        }
+      }
+      function showPanelWord(v) {
+        var panel = document.getElementById('wordPanel');
+        var word = (v.word || '').toLowerCase();
+        var inStudy = vocabMap[word];
+        var studyBadge = inStudy ? '<div class="word-panel__study-badge">\u751f\u8bcd\u5e93</div>' : '';
+        var sourceLabel = '';
+        if (v.source === 'ecdict') sourceLabel = '<div class="word-panel__source">ECDICT</div>';
+        else if (v.source === 'ai_lookup' || v.source === 'ai_analyze') sourceLabel = '<div class="word-panel__source word-panel__source--ai">AI</div>';
+        var studyBtn = inStudy        ? '<button class="word-panel__study-btn word-panel__study-btn--remove" onclick="toggleStudyWord(\'' + escHtml(word) + '\', false).then(function(){buildSidebar()})">\u79fb\u51fa\u751f\u8bcd\u5e93</button>'        : '<button class="word-panel__study-btn" onclick="toggleStudyWord(\'' + escHtml(word) + '\', true).then(function(){buildSidebar()})">+ \u52a0\u5165\u751f\u8bcd\u5e93</button>';
+        document.getElementById('wordPanelContent').innerHTML =        '<div class="word-panel__word">' + escHtml(v.word || '') + '</div>' +        sourceLabel +        (v.phonetic ? '<div class="word-panel__phonetic">' + escHtml(v.phonetic) + '</div>' : '') +        '<div class="word-panel__cn">' + escHtml(v.chinese || '') + '</div>' +        (v.explanation ? '<div class="word-panel__desc">' + escHtml(v.explanation) + '</div>' : '') +        studyBadge + studyBtn;
+        panel.style.display = 'block';
+      }
+      var _currentSentence = '';
+      function showPanelSentence(en, zh) {
+        _currentSentence = en;
+        var panel = document.getElementById('wordPanel');
+        var zhHtml = zh
+          ? '<div class="word-panel__sentence">' + escHtml(zh) + '</div>'
+          : '<div class="word-panel__hint">暂无逐句翻译</div>';
+        document.getElementById('wordPanelContent').innerHTML =
+          '<div style="font-size:var(--text-xs);color:var(--text-light);margin-bottom:4px;font-weight:600">ENGLISH</div>' +
+          '<div class="word-panel__sentence">' + escHtml(en) + '</div>' +
+          '<div style="font-size:var(--text-xs);color:var(--text-light);margin:8px 0 4px;font-weight:600">中文翻译</div>' +
+          zhHtml +
+          '<button class="word-panel__analyze-btn" onclick="analyzeSentence()">AI 解析</button>' +
+          '<div id="analyzeResult"></div>';
+        panel.style.display = 'block';
+      }
+      async function analyzeSentence() {
+        var text = _currentSentence;
+        if (!text) return;
+        var resultEl = document.getElementById('analyzeResult');
+        if (!resultEl) return;
+        resultEl.innerHTML = '<div class="word-panel__hint">AI 解析中...</div>';
+        try {
+          var res = await fetch('/api/articles/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: text,
+              article_id: currentArticle ? currentArticle.id : ''
+            })
+          });
+          var data = await res.json();
+          if (!res.ok) throw new Error(data.error || '解析失败');
+          // Build result HTML
+          var html = '';
+          if (data.summary) {
+            html += '<div class="word-panel__analyze-result">' + escHtml(data.summary) + '</div>';
+          }
+          if (data.words && data.words.length > 0) {
+            html += '<div class="word-panel__analyze-words">';
+            for (var i = 0; i < data.words.length; i++) {
+              var w = data.words[i];
+              var key = (w.word || '').toLowerCase();
+              if (!key) continue;
+              vocabMap[key] = { word: w.word, chinese: w.chinese, phonetic: w.phonetic, explanation: w.explanation, source: 'ai_analyze', status: 'new' };
+              html += '<span class="word-panel__analyze-word" data-raw="' + escAttr(key) + '">' + escHtml(w.word) + ' ' + escHtml(w.chinese || '') + '</span>';
+              // Auto-add to study list
+              try {
+                var addRes = await fetch('/api/vocabulary/study/add', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ word: key, article_id: currentArticle ? currentArticle.id : '' })
+                });
+                var addData = await addRes.json();
+                if (addData.vocabulary) vocabMap[key] = addData.vocabulary;
+              } catch (e) {}
+            }
+            html += '</div>';
+          }
+          resultEl.innerHTML = html || '<div class="word-panel__hint">解析完成</div>';
+          // Bind click on analyzed words
+          resultEl.querySelectorAll('.word-panel__analyze-word').forEach(function(el) {
+            el.addEventListener('click', function() {
+              var raw = el.dataset.raw;
+              if (raw) {
+                var vData = getVocab(raw);
+                if (vData) showPanelWord(vData);
+                else clickLookupWord(raw);
+              }
+            });
+          });
+          buildSidebar();
+        } catch (e) {
+          resultEl.innerHTML = '<div class="word-panel__hint">解析失败: ' + escHtml(e.message) + '</div>';
+        }
+      }
+      function bindWordEvents() {
+        var panel = document.getElementById('wordPanel');
+        // Sentence click -> show translation in right panel
+        document.querySelectorAll('.read-sentence').forEach(function(sent) {
+          sent.addEventListener('click', function(e) {
+            if (e.target.closest('.read-word')) return;
+            // Highlight active sentence
+            document.querySelectorAll('.read-sentence--active').forEach(function(el) {
+              el.classList.remove('read-sentence--active');
+            });
+            sent.classList.add('read-sentence--active');
+            var text = sent.textContent.trim();
+            if (text) translateSentence(text);
+          });
+        });
+        // Word click -> lookup or toggle study
+        document.querySelectorAll('.read-word').forEach(function(el) {
+          el.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var raw = el.dataset.raw;
+            if (!raw) return;
+            var vData = getVocab(raw);
+            if (vData && vData.status === 'learning') {
+              toggleStudyWord(raw, false).then(function(){
+                buildSidebar()
+              });
+            } else if
+            (vData) {
+              showPanelWord(vData);
+            } else {
+              clickLookupWord(raw);
+            }
+          });
+        });
+        // Double-click on sentence -> force translate
+        document.querySelectorAll('.read-sentence').forEach(function(sent) {
+          sent.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+            var text = sent.textContent.trim();
+            if (text) translateSentence(text);
+          });
+        });
+      }
+      var sentenceCache = {
+      };
+      var _translateSeq = 0;
+      function cacheKey(text) {
+        return text.trim().replace(/\s+/g, ' ').toLowerCase();
+      }
+      function loadSentenceCache(a) {
+        (a.segments || []).forEach(function(seg) {
+          if (seg.text && seg.translation) {
+            sentenceCache[cacheKey(seg.text)] = seg.translation;
+          }
+        });
+      }
+      async function translateSentence(text) {
+        var key = cacheKey(text);
+        if (sentenceCache[key]) {
+          showPanelSentence(text, sentenceCache[key]);
+          return;
+        }
+        var mySeq = ++_translateSeq;
+        showPanelSentence(text, '');
+        var panelContent = document.getElementById('wordPanelContent');
+        var zhArea = panelContent.querySelector('.word-panel__hint');
+        if (zhArea) zhArea.textContent = '翻译中...';
+        try {
+          var res = await fetch('/api/articles/translate-sentence', {
+            method: 'POST',          headers: {
+              'Content-Type': 'application/json'
+            }
+            ,          body: JSON.stringify({
+              sentence: text, article_id: currentArticle ? currentArticle.id : ''
+            })
+          });
+          var data = await res.json();
+          if (!res.ok) throw new Error(data.error || '翻译失败');
+          if (mySeq !== _translateSeq) return;
+          sentenceCache[key] = data.translation;
+          showPanelSentence(text, data.translation);
+        } catch
+        (e) {
+          showPanelSentence(text, '翻译失败: ' + e.message);
+        }
+      }
+      async function clickLookupWord(word) {
+        var panel = document.getElementById('wordPanel');
+        document.getElementById('wordPanelContent').innerHTML = '<div class="word-panel__word">' + escHtml(word) + '</div><div class="word-panel__hint">查询中...</div>';
+        panel.style.display = 'block';
+        try {
+          var res = await fetch('/api/vocabulary/ai-lookup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              word: word, article_id: currentArticle ? currentArticle.id : ''
+            })
+          });
+          var data = await res.json();
+          if (!res.ok) throw new Error(data.error || '查询失败');
+          var v = data.vocabulary;
+          // Don't add to vocabMap — word is looked up but NOT yet in study list
+          showPanelWord(v);
+        } catch (e) {
+          document.getElementById('wordPanelContent').innerHTML = '<div class="word-panel__word">' + escHtml(word) + '</div><div class="word-panel__hint">查询失败: ' + escHtml(e.message) + '</div>';
+        }
+      }
+      function navigateArticle(dir) {
+        var newIdx = currentIdx + dir;
+        if (newIdx < 0 || newIdx >= articles.length) return;
+        currentIdx = newIdx;
+        loadVocabulary(articles[currentIdx].id).then(function() {
+          renderArticle(articles[currentIdx]);
+        });
+      }
+      function openAIPanel(word) {
+        var panel = document.createElement('div');
+        panel.id = 'aiPanel';
+        panel.className = 'ai-panel open';
+        panel.innerHTML = '<div class="ai-panel__header"><div class="ai-panel__title">AI 助手</div><button class="ai-panel__close" onclick="closeAIPanel()">✕</button></div><div class="ai-panel__body"><div style="text-align:center;padding:40px;color:var(--text-light)">AI 分析中...</div></div>';
+        document.body.appendChild(panel);
+        document.body.classList.add('ai-panel-open');
+      }
+      function closeAIPanel() {
+        var panel = document.getElementById('aiPanel');
+        if (panel) panel.remove();
+        document.body.classList.remove('ai-panel-open');
+      }
+      loadArticle();
+  </script>
+</body>
+</html>

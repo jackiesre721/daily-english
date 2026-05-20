@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily English — 导入</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    /* ── Import page styles ── */
+
+    .page-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Page header */
+    .page-header {
+      padding: 32px 0 0;
+    }
+    .page-title {
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .page-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+
+    /* 3-column import cards */
+    .import-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 28px;
+    }
+    .import-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .import-card:hover {
+      border-color: var(--green);
+      box-shadow: var(--shadow-md);
+    }
+    .import-card.active {
+      border-color: var(--green);
+      background: var(--green-light);
+    }
+    .import-card-icon {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 12px;
+      color: var(--green);
+    }
+    .import-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .import-card-desc {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    /* Expandable panels */
+    .import-panel {
+      margin-top: 20px;
+      animation: fadeIn 0.25s ease-out both;
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      background: var(--white);
+      position: relative;
+    }
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--green);
+      background: var(--green-light);
+    }
+    .drop-zone-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      color: var(--text-light);
+      transition: color .2s;
+    }
+    .drop-zone:hover .drop-zone-icon {
+      color: var(--green);
+    }
+    .drop-zone-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .drop-zone-hint {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+    .drop-zone-formats {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 8px;
+      opacity: .7;
+    }
+    .drop-zone input[type="file"] {
+      display: none;
+    }
+
+    /* URL section */
+    .url-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+    }
+    .url-section-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .url-section-title svg {
+      width: 18px;
+      height: 18px;
+      color: var(--green);
+    }
+    .url-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .url-input-field {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .url-input-field:focus {
+      border-color: var(--green);
+    }
+    .url-input-field::placeholder {
+      color: var(--text-light);
+    }
+
+    /* Section divider */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 40px;
+    }
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .section-divider span {
+      font-size: 13px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    /* Import records */
+    .records-area {
+      margin-top: 20px;
+      padding-bottom: 40px;
+    }
+    .records-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .records-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .records-count {
+      font-size: 13px;
+      color: var(--text-light);
+      font-family: var(--font-mono);
+    }
+    .record-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .record-item {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: box-shadow .2s;
+      position: relative;
+    }
+    .record-item:hover {
+      box-shadow: var(--shadow-sm);
+    }
+    .record-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .record-icon.file {
+      background: #EFF6FF;
+      color: #2563EB;
+    }
+    .record-icon.url-icon {
+      background: var(--green-light);
+      color: var(--green);
+    }
+    .record-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    .record-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .record-name {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .record-meta {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .record-meta .dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: #D9D9D9;
+    }
+    .record-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .record-status {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .status-success {
+      background: var(--green-light);
+      color: var(--green);
+    }
+    .status-pending {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+    .status-failed {
+      background: #FEF2F2;
+      color: #EF4444;
+    }
+    .record-delete {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-light);
+      padding: 4px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity .15s, color .15s;
+      display: flex;
+      align-items: center;
+    }
+    .record-item:hover .record-delete {
+      opacity: 1;
+    }
+    .record-delete:hover {
+      color: #EF4444;
+    }
+    .record-delete svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Record articles expand */
+    .record-articles {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .record-article {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .record-article:last-child {
+      border-bottom: none;
+    }
+    .record-article__title {
+      flex: 1;
+      font-size: 13px;
+    }
+    .status-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    .status-tag--raw {
+      background: #FFF3E0;
+      color: #F57C00;
+    }
+    .status-tag--done {
+      background: #E8F5E9;
+      color: #2E7D32;
+    }
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all .15s;
+      font-family: var(--font-sans);
+    }
+    .btn-sm-primary {
+      background: var(--green);
+      color: #fff;
+    }
+    .btn-sm-primary:hover {
+      filter: brightness(1.05);
+    }
+    .btn-sm-secondary {
+      background: var(--border);
+      color: var(--text-secondary);
+      cursor: default;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      padding: 16px 0;
+      margin-top: 8px;
+    }
+    .pagination__btn {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+      background: var(--white);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all .15s;
+      font-family: var(--font-sans);
+    }
+    .pagination__btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+    .pagination__btn--active {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+    }
+    .pagination__btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+    .pagination__info {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 32px 0;
+    }
+    .empty-state svg {
+      display: block;
+      margin: 0 auto 12px;
+      opacity: .4;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .import-cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .page-header { padding: 24px 0 0; }
+      .drop-zone { padding: 28px 16px; }
+      .url-input-row { flex-direction: column; }
+      .url-input-row .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<div class="header">
+  <div class="header-top">
+    <a href="home.html" class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+      Daily English
+    </a>
+    <nav class="nav-tabs">
+      <a href="home.html" class="nav-tab">阅读</a>
+      <a href="home.html?tab=vocab" class="nav-tab">生词</a>
+      <a href="import.html" class="nav-tab active">导入</a>
+      <a href="settings.html" class="nav-tab">设置</a>
+    </nav>
+  </div>
+</div>
+
+<div class="page-container">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h1 class="page-title">导入文章</h1>
+    <p class="page-desc">上传文件或粘贴链接，将英文内容加入你的阅读库</p>
+  </div>
+
+  <!-- 3 import cards -->
+  <div class="import-cards">
+    <div class="import-card" id="cardUpload" onclick="showPanel('upload')">
+      <svg class="import-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <div class="import-card-title">上传文件</div>
+      <div class="import-card-desc">支持 TXT 纯文本</div>
+    </div>
+    <div class="import-card" id="cardUrl" onclick="showPanel('url')">
+      <svg class="import-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+      </svg>
+      <div class="import-card-title">网页链接</div>
+      <div class="import-card-desc">粘贴 URL 导入</div>
+    </div>
+    <div class="import-card" id="cardRecords" onclick="showPanel('records')">
+      <svg class="import-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      <div class="import-card-title">导入记录</div>
+      <div class="import-card-desc">查看历史记录</div>
+    </div>
+  </div>
+
+  <!-- Upload panel (hidden by default) -->
+  <div class="import-panel hidden" id="panelUpload">
+    <div class="drop-zone" id="dropZone">
+      <svg class="drop-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <div class="drop-zone-title">拖拽文件到此处，或点击选择</div>
+      <div class="drop-zone-hint">支持 TXT 纯文本文件</div>
+      <div class="drop-zone-formats">单文件最大 10 MB</div>
+      <input type="file" id="fileInput" accept=".txt">
+    </div>
+  </div>
+
+  <!-- URL panel (hidden by default) -->
+  <div class="import-panel hidden" id="panelUrl">
+    <div class="url-section">
+      <div class="url-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+        从网页导入
+      </div>
+      <div class="url-input-row">
+        <input type="url" class="url-input-field" id="importUrl" placeholder="粘贴文章链接，如 https://example.com/article">
+        <button class="btn btn-primary" id="importUrlBtn" onclick="importUrl()">导入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section divider -->
+  <div class="section-divider"><span>导入记录</span></div>
+
+  <!-- Import records -->
+  <div class="records-area">
+    <div class="records-header">
+      <h2 class="records-title">最近导入</h2>
+      <span class="records-count" id="recordCount"></span>
+    </div>
+    <div class="record-list" id="recordList">
+      <div style="color:var(--text-light);font-size:14px;padding:8px 0">加载中...</div>
+    </div>
+    <div class="pagination" id="importPagination"></div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="/js/api.js"></script>
+<script>
+  // ── Helpers ──
+  function escH(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Toast ──
+  var _toastTimer;
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2500);
+  }
+
+  // ── Panel switching ──
+  var activePanel = null;
+
+  function showPanel(name) {
+    var panelUpload = document.getElementById('panelUpload');
+    var panelUrl = document.getElementById('panelUrl');
+    var cardUpload = document.getElementById('cardUpload');
+    var cardUrl = document.getElementById('cardUrl');
+    var cardRecords = document.getElementById('cardRecords');
+
+    // Deactivate all cards
+    cardUpload.classList.remove('active');
+    cardUrl.classList.remove('active');
+    cardRecords.classList.remove('active');
+
+    // Hide all panels
+    panelUpload.classList.add('hidden');
+    panelUrl.classList.add('hidden');
+
+    if (activePanel === name) {
+      // Toggle off
+      activePanel = null;
+      return;
+    }
+
+    activePanel = name;
+
+    if (name === 'upload') {
+      panelUpload.classList.remove('hidden');
+      cardUpload.classList.add('active');
+    } else if (name === 'url') {
+      panelUrl.classList.remove('hidden');
+      cardUrl.classList.add('active');
+    } else if (name === 'records') {
+      cardRecords.classList.add('active');
+      // Scroll to records section
+      document.querySelector('.section-divider').scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  // ── Drop zone ──
+  var dropZone = document.getElementById('dropZone');
+  var fileInput = document.getElementById('fileInput');
+
+  dropZone.addEventListener('click', function() { fileInput.click(); });
+  dropZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+  dropZone.addEventListener('dragleave', function() {
+    dropZone.classList.remove('dragover');
+  });
+  dropZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    var file = e.dataTransfer.files[0];
+    if (file) handleFileUpload(file);
+  });
+  fileInput.addEventListener('change', function(e) {
+    if (e.target.files[0]) handleFileUpload(e.target.files[0]);
+  });
+
+  async function handleFileUpload(file) {
+    dropZone.innerHTML = '<div class="drop-zone-title" style="color:var(--text-light)">上传中...</div>';
+    dropZone.style.pointerEvents = 'none';
+    try {
+      var formData = new FormData();
+      formData.append('file', file);
+      var res = await fetch('/api/articles/import-txt', { method: 'POST', body: formData });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || '导入失败');
+      dropZone.innerHTML = '<div class="drop-zone-title" style="color:var(--green)">导入成功！</div>';
+      showToast('文件导入成功');
+      setTimeout(function() { resetDropZone(); }, 1500);
+      loadImportSources(1);
+    } catch (e) {
+      showToast('导入失败: ' + e.message);
+      resetDropZone();
+    }
+    fileInput.value = '';
+  }
+
+  function resetDropZone() {
+    dropZone.innerHTML =
+      '<svg class="drop-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>' +
+        '<polyline points="17 8 12 3 7 8"/>' +
+        '<line x1="12" y1="3" x2="12" y2="15"/>' +
+      '</svg>' +
+      '<div class="drop-zone-title">拖拽文件到此处，或点击选择</div>' +
+      '<div class="drop-zone-hint">支持 TXT 纯文本文件</div>' +
+      '<div class="drop-zone-formats">单文件最大 10 MB</div>';
+    dropZone.style.pointerEvents = 'auto';
+    // Re-attach file input
+    var newInput = document.createElement('input');
+    newInput.type = 'file';
+    newInput.id = 'fileInput';
+    newInput.accept = '.txt';
+    newInput.style.display = 'none';
+    newInput.addEventListener('change', function(e) {
+      if (e.target.files[0]) handleFileUpload(e.target.files[0]);
+    });
+    dropZone.appendChild(newInput);
+    fileInput = newInput;
+  }
+
+  // ── URL import ──
+  async function importUrl() {
+    var urlInput = document.getElementById('importUrl');
+    var url = urlInput.value.trim();
+    if (!url) { showToast('请输入网页 URL'); return; }
+    var btn = document.getElementById('importUrlBtn');
+    btn.textContent = '导入中...'; btn.disabled = true;
+    try {
+      var res = await fetch('/api/articles/import-url', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({url: url})
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || '导入失败');
+      showToast('导入成功: ' + (data.article.title_zh || data.article.title_en));
+      urlInput.value = '';
+      loadImportSources(1);
+    } catch(e) {
+      showToast('导入失败: ' + e.message);
+    } finally {
+      btn.textContent = '导入'; btn.disabled = false;
+    }
+  }
+
+  // ── Import sources list ──
+  var importPage = 1;
+  var importPages = 1;
+
+  async function loadImportSources(page) {
+    page = page || 1;
+    try {
+      var data = await GET('/import-sources?page=' + page + '&limit=20');
+      var sources = data.sources || [];
+      importPage = data.page || page;
+      importPages = data.pages || 1;
+
+      var container = document.getElementById('recordList');
+      document.getElementById('recordCount').textContent = sources.length ? (importPage - 1) * 20 + sources.length + ' 条记录' : '';
+
+      if (!sources || sources.length === 0) {
+        container.innerHTML =
+          '<div class="empty-state">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;height:40px">' +
+              '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' +
+              '<polyline points="14 2 14 8 20 8"/>' +
+            '</svg>' +
+            '<p style="font-size:14px;color:var(--text-light)">暂无导入记录</p>' +
+          '</div>';
+        renderImportPagination();
+        return;
+      }
+
+      var html = '';
+      for (var i = 0; i < sources.length; i++) {
+        var s = sources[i];
+        var statusCls = s.status === 'completed' ? 'status-success' : s.status === 'failed' ? 'status-failed' : 'status-pending';
+        var statusLabel = s.status === 'completed' ? '导入成功' : s.status === 'failed' ? '导入失败' : '处理中';
+        var isUrl = s.type === 'url';
+        var iconCls = isUrl ? 'url-icon' : 'file';
+        var iconSvg = isUrl
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+        var errHtml = s.status === 'failed' && s.error_message
+          ? '<div style="font-size:12px;color:#EF4444;margin-top:2px">' + escH(s.error_message) + '</div>' : '';
+
+        html += '<div class="record-item" data-source-id="' + s.id + '">' +
+          '<div class="record-icon ' + iconCls + '">' + iconSvg + '</div>' +
+          '<div class="record-info">' +
+            '<div class="record-name">' + escH(s.name) + '</div>' +
+            '<div class="record-meta">' +
+              '<span>' + s.article_count + ' 篇文章</span>' +
+              '<span class="dot"></span>' +
+              '<span>' + (s.created_at || '').slice(0,10) + '</span>' +
+            '</div>' +
+            errHtml +
+          '</div>' +
+          '<div class="record-actions">' +
+            '<span class="record-status ' + statusCls + '">' + statusLabel + '</span>' +
+            '<button class="record-delete" onclick="deleteImportSource(\'' + s.id + '\')" title="删除">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                '<polyline points="3 6 5 6 21 6"/>' +
+                '<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>' +
+              '</svg>' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+      }
+      container.innerHTML = html;
+      renderImportPagination();
+
+      // Load articles for completed sources
+      sources.forEach(function(s) {
+        if (s.status === 'completed' && s.article_count > 0) {
+          loadSourceArticles(s.id);
+        }
+      });
+    } catch (e) { console.error('load import sources:', e); }
+  }
+
+  async function loadSourceArticles(sourceId) {
+    try {
+      var srcData = await GET('/import-sources/' + sourceId + '/articles');
+      var articles = srcData.articles || [];
+      if (!articles.length) return;
+
+      var recordItem = document.querySelector('.record-item[data-source-id="' + sourceId + '"]');
+      if (!recordItem) return;
+      var info = recordItem.querySelector('.record-info');
+      if (info.querySelector('.record-articles')) return;
+
+      var articlesHtml = '<div class="record-articles">';
+      articles.forEach(function(a) {
+        var isRaw = a.type === 'raw' || !a.words || a.words.length === 0;
+        var tag = isRaw
+          ? '<span class="status-tag status-tag--raw">待优化</span>'
+          : '<span class="status-tag status-tag--done">已优化</span>';
+        var optimizeBtn = isRaw
+          ? '<button onclick="event.stopPropagation();optimizeArticle(\'' + a.id + '\', this)" class="btn-sm btn-sm-primary">AI优化</button>'
+          : '';
+        articlesHtml += '<div class="record-article">' +
+          '<div class="record-article__title">' + escH(a.title_en || a.title_zh || a.id) + '</div>' +
+          tag + optimizeBtn +
+        '</div>';
+      });
+      articlesHtml += '</div>';
+      info.insertAdjacentHTML('beforeend', articlesHtml);
+    } catch(e) {}
+  }
+
+  function renderImportPagination() {
+    var container = document.getElementById('importPagination');
+    if (importPages <= 1) { container.innerHTML = ''; return; }
+    var html = '<button class="pagination__btn" onclick="loadImportSources(' + (importPage - 1) + ')"' + (importPage <= 1 ? ' disabled' : '') + '>上一页</button>';
+    var start = Math.max(1, importPage - 2);
+    var end = Math.min(importPages, importPage + 2);
+    if (start > 1) html += '<button class="pagination__btn" onclick="loadImportSources(1)">1</button>';
+    if (start > 2) html += '<span class="pagination__info">...</span>';
+    for (var i = start; i <= end; i++) {
+      html += '<button class="pagination__btn' + (i === importPage ? ' pagination__btn--active' : '') + '" onclick="loadImportSources(' + i + ')">' + i + '</button>';
+    }
+    if (end < importPages - 1) html += '<span class="pagination__info">...</span>';
+    if (end < importPages) html += '<button class="pagination__btn" onclick="loadImportSources(' + importPages + ')">' + importPages + '</button>';
+    html += '<button class="pagination__btn" onclick="loadImportSources(' + (importPage + 1) + ')"' + (importPage >= importPages ? ' disabled' : '') + '>下一页</button>';
+    container.innerHTML = html;
+  }
+
+  // ── AI Optimize ──
+  var activeIntervals = [];
+  window.addEventListener('beforeunload', function() {
+    activeIntervals.forEach(function(id) { clearInterval(id); });
+  });
+
+  async function optimizeArticle(articleId, btn) {
+    btn.disabled = true; btn.textContent = '启动中...';
+    var stepLabels = { 'format': '排版分析中...', 'words': '提取生词中...', 'quizzes': '生成测验中...', 'done': '已完成！' };
+    try {
+      var res = await POST('/articles/optimize/' + articleId, {});
+      if (res.status !== 'started' && res.status !== 'ok') throw new Error(res.error || '启动失败');
+      var pollInterval = setInterval(async function() {
+        try {
+          var status = await GET('/articles/optimize-status/' + articleId);
+          btn.textContent = stepLabels[status.step] || '处理中...';
+          if (status.status === 'completed') {
+            clearInterval(pollInterval);
+            activeIntervals = activeIntervals.filter(function(x) { return x !== pollInterval; });
+            btn.textContent = '已优化';
+            btn.className = 'btn-sm btn-sm-secondary';
+            showToast('AI优化完成');
+            setTimeout(function() { loadImportSources(1); }, 500);
+          } else if (status.status === 'failed') {
+            clearInterval(pollInterval);
+            activeIntervals = activeIntervals.filter(function(x) { return x !== pollInterval; });
+            showToast('AI优化失败: ' + (status.error || '未知错误'));
+            btn.textContent = 'AI优化'; btn.disabled = false;
+          }
+        } catch(e) {}
+      }, 3000);
+      activeIntervals.push(pollInterval);
+    } catch (e) {
+      showToast('启动AI优化失败: ' + e.message);
+      btn.textContent = 'AI优化'; btn.disabled = false;
+    }
+  }
+
+  // ── Delete ──
+  async function deleteImportSource(id) {
+    if (!confirm('确认删除此导入来源及其所有文章？')) return;
+    try {
+      await fetch('/api/import-sources/' + id, { method: 'DELETE', headers: {'Content-Type':'application/json'} });
+      showToast('已删除');
+      loadImportSources(importPage);
+    } catch (e) { showToast('删除失败: ' + e.message); }
+  }
+
+  // ── Init ──
+  loadImportSources(1);
+</script>
+</body>
+</html>

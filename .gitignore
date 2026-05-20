@@ -1,0 +1,24 @@
+# Database (contains user data and auth tokens)
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# Compiled binary
+daily-english
+server
+*.exe
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local

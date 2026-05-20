@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily English — 设置</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .settings-page { max-width: 680px; margin: 0 auto; padding: 32px 20px 48px; }
+    .settings-page h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .settings-page .subtitle { font-size: 14px; color: var(--text-light); margin-bottom: 28px; }
+
+    .section-label {
+      font-size: 13px; font-weight: 500; color: var(--text-light);
+      padding: 0 4px; margin-bottom: 8px; margin-top: 28px;
+    }
+    .section-label:first-of-type { margin-top: 0; }
+
+    .card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+    }
+    .card-row {
+      display: flex; align-items: center; padding: 14px 16px; gap: 12px;
+    }
+    .card-row + .card-row { border-top: 1px solid var(--border); }
+    .card-row__icon {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .card-row__label { flex: 1; font-size: 15px; }
+    .card-row__value { font-size: 13px; color: var(--text-light); }
+
+    /* AI fields */
+    .ai-fields { display: flex; flex-direction: column; gap: 10px; padding: 0 16px 16px 56px; }
+    .field-row { display: flex; align-items: center; gap: 8px; }
+    .field-row label {
+      font-size: 13px; color: var(--text-light); min-width: 64px; flex-shrink: 0;
+    }
+    .field-row input {
+      flex: 1; padding: 7px 10px; border: 1px solid var(--border);
+      border-radius: var(--radius); font-size: 14px; font-family: var(--font-sans);
+      background: var(--white); color: var(--text); outline: none;
+      transition: border-color .15s;
+    }
+    .field-row input:focus { border-color: var(--green); }
+    .field-row input::placeholder { color: var(--text-light); }
+
+    /* Theme selector */
+    .theme-grid {
+      display: flex; gap: 12px; padding: 16px; flex-wrap: wrap;
+    }
+    .theme-option {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      cursor: pointer; padding: 8px; border-radius: var(--radius);
+      border: 2px solid transparent; transition: border-color .15s;
+    }
+    .theme-option:hover { border-color: var(--border); }
+    .theme-option.selected { border-color: var(--green); }
+    .theme-swatch {
+      width: 64px; height: 40px; border-radius: 8px; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .theme-dot {
+      width: 18px; height: 18px; border-radius: 50%; display: block;
+    }
+    .theme-name {
+      font-size: 12px; color: var(--text-secondary); white-space: nowrap;
+    }
+    .theme-option.selected .theme-name { color: var(--text); font-weight: 500; }
+
+    /* Save */
+    .save-bar { margin-top: 32px; }
+
+    /* Toast (inline fallback if not in app.css) */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--text); color: var(--white);
+      font-size: 14px; font-weight: 500;
+      padding: 8px 16px; border-radius: 6px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      z-index: 300;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 640px) {
+      .settings-page { padding: 20px 16px 40px; }
+      .ai-fields { padding-left: 16px; }
+      .field-row { flex-direction: column; align-items: stretch; gap: 4px; }
+      .field-row label { min-width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <a href="home.html" class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+      Daily English
+    </a>
+    <nav class="nav-tabs">
+      <a href="home.html" class="nav-tab">阅读</a>
+      <a href="home.html?tab=vocab" class="nav-tab">生词</a>
+      <a href="import.html" class="nav-tab">导入</a>
+      <a href="settings.html" class="nav-tab active">设置</a>
+    </nav>
+  </div>
+</div>
+
+<div class="settings-page">
+  <h1>设置</h1>
+
+  <!-- 外观主题 -->
+  <div class="section-label" style="margin-top:0">外观主题</div>
+  <div class="card animate-fade-in">
+    <div class="theme-grid">
+      <div class="theme-option" data-theme="morandi" onclick="selectTheme('morandi',this)">
+        <div class="theme-swatch" style="background:#FAF5EF">
+          <span class="theme-dot" style="background:#B8956A"></span>
+        </div>
+        <span class="theme-name">莫兰迪暖调</span>
+      </div>
+      <div class="theme-option" data-theme="earth" onclick="selectTheme('earth',this)">
+        <div class="theme-swatch" style="background:#F7F3ED">
+          <span class="theme-dot" style="background:#7D8C72"></span>
+        </div>
+        <span class="theme-name">自然大地色</span>
+      </div>
+      <div class="theme-option" data-theme="blue" onclick="selectTheme('blue',this)">
+        <div class="theme-swatch" style="background:#F0F3F7">
+          <span class="theme-dot" style="background:#6B8AAD"></span>
+        </div>
+        <span class="theme-name">静谧蓝调</span>
+      </div>
+      <div class="theme-option" data-theme="eyecare" onclick="selectTheme('eyecare',this)">
+        <div class="theme-swatch" style="background:#F5F0E1">
+          <span class="theme-dot" style="background:#8B7D5E"></span>
+        </div>
+        <span class="theme-name">护眼经典</span>
+      </div>
+      <div class="theme-option" data-theme="default" onclick="selectTheme('default',this)">
+        <div class="theme-swatch" style="background:#F5F5F5">
+          <span class="theme-dot" style="background:#52C41A"></span>
+        </div>
+        <span class="theme-name">默认绿</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI 配置 -->
+  <div class="section-label">AI 配置</div>
+  <div class="card animate-fade-in">
+    <div class="card-row">
+      <div class="card-row__icon" style="background:var(--green-light)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v1H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h1v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5h1a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-5V5a3 3 0 0 0-3-3z"/></svg>
+      </div>
+      <div class="card-row__label">AI 接口配置</div>
+    </div>
+    <div class="ai-fields">
+      <div class="field-row">
+        <label>Base URL</label>
+        <input type="text" id="aiBaseUrl" placeholder="https://api.example.com">
+      </div>
+      <div class="field-row">
+        <label>Auth Token</label>
+        <input type="password" id="aiAuthToken" placeholder="sk-...">
+      </div>
+      <div class="field-row">
+        <label>Model</label>
+        <input type="text" id="aiModel" placeholder="gpt-4">
+      </div>
+    </div>
+  </div>
+
+  <!-- 关于 -->
+  <div class="section-label">关于</div>
+  <div class="card animate-fade-in">
+    <div class="card-row">
+      <div class="card-row__icon" style="background:var(--bg)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      </div>
+      <div class="card-row__label">版本</div>
+      <div class="card-row__value">1.0.0</div>
+    </div>
+  </div>
+
+  <!-- Save -->
+  <div class="save-bar">
+    <button onclick="saveSettings()" class="btn btn-primary btn-block">保存设置</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/api.js"></script>
+<script>
+  var currentSettings = {};
+  var selectedTheme = 'morandi';
+
+  function selectTheme(theme, el) {
+    selectedTheme = theme;
+    document.querySelectorAll('.theme-option').forEach(function(o) { o.classList.remove('selected'); });
+    el.classList.add('selected');
+    document.documentElement.setAttribute('data-theme', theme);
+    try { localStorage.setItem('de_theme', theme); } catch(e) {}
+    var settings = currentSettings || {};
+    settings.theme = theme;
+    currentSettings = settings;
+    PUT('/settings', { name: settings.name || '', settings_json: JSON.stringify(settings) }).catch(function(e) { console.error('theme save error', e); });
+  }
+
+  function showToast(msg) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(function () { el.classList.remove('show'); }, 2000);
+  }
+
+  async function saveSettings() {
+    var settings = currentSettings || {};
+    settings.ai = {
+      base_url: document.getElementById('aiBaseUrl').value,
+      auth_token: document.getElementById('aiAuthToken').value,
+      model: document.getElementById('aiModel').value
+    };
+    settings.font_size = 'medium';
+    var body = {
+      name: settings.name || '',
+      settings_json: JSON.stringify(settings)
+    };
+    try {
+      var res = await PUT('/settings', body);
+      if (res.status === 'ok') {
+        showToast('设置已保存');
+      } else {
+        showToast('保存失败');
+      }
+    } catch (e) {
+      console.error('Failed to save settings', e);
+      showToast('保存失败: ' + e.message);
+    }
+  }
+
+  (async function () {
+    try {
+      var settings = await GET('/settings');
+      if (settings.settings_json) {
+        try {
+          var parsed = JSON.parse(settings.settings_json);
+          currentSettings = parsed;
+          if (parsed.ai) {
+            if (parsed.ai.base_url) document.getElementById('aiBaseUrl').value = parsed.ai.base_url;
+            if (parsed.ai.auth_token) document.getElementById('aiAuthToken').value = parsed.ai.auth_token;
+            if (parsed.ai.model) document.getElementById('aiModel').value = parsed.ai.model;
+          }
+          if (parsed.theme) {
+            selectedTheme = parsed.theme;
+            document.documentElement.setAttribute('data-theme', parsed.theme);
+            var opt = document.querySelector('.theme-option[data-theme="'+parsed.theme+'"]');
+            if (opt) opt.classList.add('selected');
+          } else {
+            var opt = document.querySelector('.theme-option[data-theme="morandi"]');
+            if (opt) opt.classList.add('selected');
+          }
+        } catch (parseErr) {
+          console.warn('Failed to parse settings_json', parseErr);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load settings', e);
+    }
+  })();
+</script>
+</body>
+</html>
